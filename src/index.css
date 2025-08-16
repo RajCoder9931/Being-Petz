@@ -1,0 +1,37 @@
+/* PLEASE NOTE: THESE TAILWIND IMPORTS SHOULD NEVER BE DELETED */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+/* DO NOT DELETE THESE TAILWIND IMPORTS, OTHERWISE THE STYLING WILL NOT RENDER AT ALL */
+@keyframes moveUpDown {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(50px) scale(1.05);
+  }
+}
+@keyframes moveLeftRight {
+  0%, 100% {
+    transform: translateX(0) scale(1.2);
+  }
+  50% {
+    transform: translateX(50px) scale(1.25);
+  }
+}
+@keyframes moveDownUp {
+  0%, 100% {
+    transform: translateY(0) scale(1.5);
+  }
+  50% {
+    transform: translateY(-50px) scale(1.55);
+  }
+}
+@keyframes moveRightLeft {
+  0%, 100% {
+    transform: translateX(0) scale(1.8);
+  }
+  50% {
+    transform: translateX(-50px) scale(1.85);
+  }
+}

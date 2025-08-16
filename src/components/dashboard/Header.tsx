@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         {/* Home - Navigate */}
         <button
           className="p-2 rounded hover:bg-[#6e2e96] transition-colors"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/")}
         >
           <Home size={20} />
         </button>

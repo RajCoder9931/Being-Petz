@@ -8,7 +8,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { name: "Home", icon: Home, path: "/dashboard" },
+  { name: "Home", icon: Home, path: "/" },
   { name: "Profile", icon: User, path: "/profile" },
   { name: "Pet Parents", icon: Users, path: "/pet-parents" },
   { name: "Chats", icon: MessageSquare, path: "/chats" },

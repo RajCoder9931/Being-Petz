@@ -14,9 +14,9 @@ import PetDetails from './pages/PetDetails';
  export function App() {
   return <Router>
       <Routes>
-        <Route path="/" element={<SignUpPage />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/SignUp" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/footer" element={<Footer />} />
         <Route path="/profile" element={<Profile/>}/>

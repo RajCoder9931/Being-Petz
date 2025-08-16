@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckIcon, FacebookIcon, TwitterIcon, InstagramIcon } from 'lucide-react';
+import {   FacebookIcon, TwitterIcon, InstagramIcon } from 'lucide-react';
 import CircleAnimation from '../common/CircleAnimation';
 import ImageCarousel from '../common/ImageCarousel';
 import Img1 from '../../assets/img/1.png';

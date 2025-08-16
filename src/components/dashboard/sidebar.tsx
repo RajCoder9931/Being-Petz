@@ -30,21 +30,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             key={name}
             to={path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
+              `group flex items-center gap-3 px-4 py-2 rounded-md font-medium transition-all duration-300 ease-in-out ${
                 isActive
-                  ? "bg-white"
-                  : "hover:bg-white"
+                  ? "bg-white text-[#8337B2]"
+                  : "hover:bg-white hover:text-[#8337B2]"
               }`
             }
-            style={({ isActive }) => ({
-              color: isActive ? "#8337B2" : "white",
-              ...(isActive
-                ? {}
-                : { "--hover-text-color": "#8337B2" } as React.CSSProperties),
-            })}
             onClick={onClose}
           >
-            <Icon size={20} />
+            <Icon
+              size={20}
+              className="transition-colors duration-300 ease-in-out group-hover:text-[#8337B2]"
+            />
             <span>{name}</span>
           </NavLink>
         ))}

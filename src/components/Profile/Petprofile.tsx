@@ -84,10 +84,10 @@ const Petprofile: React.FC = () => {
           <div className="pt-20 pb-6 text-center px-4">
             {/* Name & Gender */}
             <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-              Tom
+              Luna
               <img src={genderIcon} alt="Male" className="w-5 h-5" />
             </h2>
-            <p className="text-gray-500 text-sm">2 Year 3 months Old</p>
+            <p className="text-gray-500 text-sm">2 Year Old </p>
 
             {/* Breed & Weight */}
             <div className="flex items-center justify-center gap-3 mt-2 text-sm text-gray-600">

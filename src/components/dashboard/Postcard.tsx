@@ -1,8 +1,14 @@
-import React, { useState } from "react";
-
-interface PostCardProps {
+import  { useState } from "react";
+ interface Comment {
+  user: string;
+  avatar: string;
+  text: string;
+  time: string;
+}
+ interface PostCardProps {
   profileImg: string;
   userName: string;
+  action?: string;
   time: string;
   text?: string;
   image?: string;
@@ -10,11 +16,14 @@ interface PostCardProps {
   likes: number;
   comments: number;
   shares: number;
+  initialComments: Comment[];
+  className?: string;  
 }
 
 const PostCard: React.FC<PostCardProps> = ({
   profileImg,
   userName,
+  action,
   time,
   text,
   image,
@@ -22,48 +31,67 @@ const PostCard: React.FC<PostCardProps> = ({
   likes,
   comments,
   shares,
+  initialComments,
+  className = "",
 }) => {
-  const [showReactions, setShowReactions] = useState(false);
-  const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
-  const [commentList, setCommentList] = useState<string[]>([
-    "So cute! 😍",
-    "I love this post ❤️",
-  ]);
+  const [commentList, setCommentList] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState("");
 
-  const reactions = ["👍", "❤️", "😂", "😮", "😢", "😡"];
+  const [likeCount, setLikeCount] = useState(likes);
+  const [isLiked, setIsLiked] = useState(false);
 
-  const handleReactionClick = (reaction: string) => {
-    setSelectedReaction(reaction);
-    setShowReactions(false);
-  };
+  const [commentCount, setCommentCount] = useState(comments);
 
-  const handleAddComment = () => {
-    if (newComment.trim() !== "") {
-      setCommentList((prev) => [...prev, newComment]);
-      setNewComment("");
+   const handleLike = () => {
+    if (isLiked) {
+      setLikeCount(likeCount - 1);
+    } else {
+      setLikeCount(likeCount + 1);
     }
+    setIsLiked(!isLiked);
   };
+
+   function handleAddComment() {
+    if (newComment.trim() !== "") {
+      setCommentList((prev) => [
+        ...prev,
+        {
+          user: "You",
+          avatar: profileImg,
+          text: newComment,
+          time: "Just now",
+        },
+      ]);
+      setNewComment("");
+      setCommentCount(commentCount + 1);
+    }
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow p-4">
-      {/* Profile */}
-      <div className="flex items-center gap-3 mb-3">
+<div
+  className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 max-w-lg ${className}`}
+>      {/* Top Section */}
+      <div className="flex items-start gap-3 mb-3">
         <img
           src={profileImg}
           alt={userName}
           className="w-10 h-10 rounded-full object-cover"
         />
         <div>
-          <p className="font-semibold">{userName}</p>
-          <p className="text-xs text-gray-500">{time}</p>
+          <p className="font-semibold">
+            {userName}{" "}
+            {action && (
+              <span className="font-normal text-gray-500">{action}</span>
+            )}
+          </p>
+          <p className="text-xs text-blue-500">{time}</p>
         </div>
       </div>
 
-      {/* Post text */}
-      {text && <p className="mb-3">{text}</p>}
+      {/* Post Text */}
+      {text && <p className="text-gray-700 mb-3">{text}</p>}
 
-      {/* Post image/video */}
+      {/* Post Image */}
       {image && (
         <img
           src={image}
@@ -71,79 +99,92 @@ const PostCard: React.FC<PostCardProps> = ({
           className="w-full rounded-lg mb-3 object-cover"
         />
       )}
+
+      {/* Post Video */}
       {video && (
-        <iframe
-          src={video}
-          title="Video Post"
-          className="w-full h-64 rounded-lg mb-3"
-          allowFullScreen
-        ></iframe>
+        <div className="w-full rounded-lg overflow-hidden mb-3">
+          <iframe
+            width="100%"
+            height="250"
+            src={video}
+            title="video"
+            allowFullScreen
+          />
+        </div>
       )}
 
-      {/* Likes/Comments count */}
-      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-        <span>{likes} Likes {selectedReaction && `(${selectedReaction})`}</span>
-        <span>{comments} Comments</span>
-        <span>{shares} Shares</span>
+      {/* Stats */}
+      <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+        <div className="flex gap-2 items-center">
+          <span>👍 ❤️</span>
+          <span>{likeCount} Likes</span>
+        </div>
+        <div className="flex gap-4">
+          <span>{commentCount} Comment</span>
+          <span>{shares} Share</span>
+        </div>
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-around border-t border-b py-2 text-gray-600 text-sm font-medium">
-        {/* Like */}
+      <div className="flex justify-around border-y py-2 text-gray-600 text-sm font-medium">
         <div
-          className="relative flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded"
-          onMouseEnter={() => setShowReactions(true)}
-          onMouseLeave={() => setShowReactions(false)}
+          onClick={handleLike}
+          className={`flex items-center gap-2 cursor-pointer px-4 py-1 rounded ${
+            isLiked ? "text-blue-600 font-semibold" : "hover:bg-gray-100"
+          }`}
         >
-          👍 Like
-          {showReactions && (
-            <div className="absolute -top-12 left-0 flex gap-2 bg-white shadow-lg rounded-full px-3 py-2 z-10">
-              {reactions.map((r) => (
-                <span
-                  key={r}
-                  className="text-xl cursor-pointer hover:scale-125 transition"
-                  onClick={() => handleReactionClick(r)}
-                >
-                  {r}
-                </span>
-              ))}
-            </div>
-          )}
+          👍 {isLiked ? "Liked" : "Like"}
         </div>
-
-        {/* Comment */}
         <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded">
           💬 Comment
         </div>
-
-        {/* Share */}
         <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded">
           ↗️ Share
         </div>
       </div>
 
       {/* Comments */}
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 space-y-3">
         {commentList.map((c, index) => (
-          <div key={index} className="bg-gray-100 rounded-lg p-2 text-sm">
-            {c}
+          <div key={index} className="flex gap-2 items-start">
+            <img
+              src={c.avatar}
+              alt={c.user}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <div>
+              <p className="text-sm bg-gray-100 rounded-lg px-3 py-1">
+                <span className="font-semibold">{c.user}</span> {c.text}
+              </p>
+              <div className="text-xs text-gray-500 flex gap-3 mt-1">
+                <span>Like</span>
+                <span>Reply</span>
+                <span>Translate</span>
+                <span>{c.time}</span>
+              </div>
+            </div>
           </div>
         ))}
 
         {/* Add comment */}
-        <div className="flex gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-2">
+          <img
+            src={profileImg}
+            alt="you"
+            className="w-8 h-8 rounded-full object-cover"
+          />
           <input
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
+            placeholder="Enter Your Comment"
             className="flex-1 border rounded-full px-3 py-1 text-sm"
           />
           <button
             onClick={handleAddComment}
-            className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-700"
+            className="text-gray-400 hover:text-purple-600"
           >
-            Post
+            ➤
           </button>
         </div>
       </div>

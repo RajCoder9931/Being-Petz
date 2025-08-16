@@ -92,13 +92,14 @@ const Dashboard = () => {
                 likes={140}
                 comments={20}
                 shares={99}
+                initialComments={[]}
               />
 
               <FriendSuggestions
                 suggestions={[
-                  { name: "Buddy (Golden)", desc: "Loves fetching and cuddles", mutual: 3, img:img7 },
-                  { name: "Kiwi (Talks-a-lot)", desc: "Can say your name!", mutual: 2, img:img8 },
-                  { name: "Nibbles (Tiny Hero)", desc: "Full of energy and love!", mutual: 4, img:img9},
+                  { name: "Buddy (Golden)", desc: "Loves fetching and cuddles", mutual: 3, img: img7 },
+                  { name: "Kiwi (Talks-a-lot)", desc: "Can say your name!", mutual: 2, img: img8 },
+                  { name: "Nibbles (Tiny Hero)", desc: "Full of energy and love!", mutual: 4, img: img9 },
                 ]}
               />
 
@@ -110,6 +111,7 @@ const Dashboard = () => {
                 likes={140}
                 comments={20}
                 shares={99}
+                initialComments={[]}
               />
 
               <PostCard
@@ -121,6 +123,7 @@ const Dashboard = () => {
                 likes={100}
                 comments={15}
                 shares={80}
+                initialComments={[]}
               />
 
               <PostCard
@@ -128,10 +131,11 @@ const Dashboard = () => {
                 userName="Paige Turner"
                 time="1 day ago"
                 text="Lorem ipsum dolor sit amet..."
-                video="https://www.youtube.com/embed/xeXV1KoX034?start=60"
+                video="https://www.youtube.com/embed/tgbNymZ7vqY" // 👈 Example video
                 likes={140}
                 comments={20}
                 shares={99}
+                initialComments={[]}
               />
 
             </div>
@@ -171,18 +175,19 @@ const Dashboard = () => {
 
               {/* Adopt Pet */}
               <div
-                className="relative rounded-2xl shadow-lg overflow-hidden h-56 bg-cover bg-center"
+                className="relative rounded-2xl shadow-lg overflow-hidden h-60 bg-cover bg-center"
                 style={{ backgroundImage: `url(${adoptPetImg})` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-blue-500/70 p-5 flex flex-col justify-center text-white">
-                  <h3 className="text-lg font-semibold">Adopt a Pet</h3>
-                  <p className="text-sm mt-1">Give a homeless pet a home and a loving family!</p>
+                  <h3 className="text-xl font-semibold">Adopt a Pet</h3>
+                  <p className="text-sm mt-2">Give a homeless pet a home and a loving family!</p>
                   <Link
                     to="/adopt-pet"
-                    className="mt-2 flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white text-sm font-medium shadow-md hover:opacity-90 transition"
+                    className="mt-3 ml-auto flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white text-xs font-medium shadow-md hover:opacity-90 transition"
                   >
-                    <FaPaw /> Adopt Now
+                    <FaPaw className="text-white text-sm" /> Adopt Now
                   </Link>
+
                 </div>
               </div>
 
@@ -191,24 +196,28 @@ const Dashboard = () => {
                 className="relative rounded-2xl shadow-lg overflow-hidden h-56 bg-cover bg-center"
                 style={{ backgroundImage: `url(${lostFoundImg})` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-500/80 to-pink-400/80 p-5 flex flex-col justify-center text-white">
-                  <h3 className="text-lg font-semibold">Lost &amp; Found Pets</h3>
+                {/* gradient left → right: pink → purple */}
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-900/20 to-purple-600/90 p-5 flex flex-col justify-center text-white">
+                  <h3 className="text-xl font-semibold">Lost &amp; Found Pets</h3>
                   <div className="mt-4 flex gap-3">
+                    {/* Report button (gradient) */}
                     <Link
                       to="/report"
-                      className="px-5 py-2 rounded-full bg-purple-600 text-white text-sm font-medium shadow-md hover:bg-purple-700 transition"
+                      className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white text-sm font-medium shadow-md hover:opacity-90 transition"
                     >
                       Report
                     </Link>
+                    {/* Found button (white with purple border) */}
                     <Link
                       to="/found"
-                      className="px-5 py-2 rounded-full border border-white text-white text-sm font-medium shadow-md hover:bg-white hover:text-pink-600 transition"
+                      className="px-6 py-2 rounded-full bg-white text-purple-600 border border-purple-600 text-sm font-medium shadow-md hover:bg-purple-600 hover:text-white transition"
                     >
                       Found
                     </Link>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </main>
@@ -217,7 +226,7 @@ const Dashboard = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-5 relative">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5 relative">
             <button onClick={closeModal} className="absolute top-3 right-3 text-gray-600 hover:text-black">
               ✕
             </button>
@@ -252,7 +261,7 @@ const Dashboard = () => {
         </div>
       )}
       <Loader />
-            <Footer />
+      <Footer />
 
     </div>
   );

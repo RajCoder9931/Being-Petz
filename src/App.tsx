@@ -11,10 +11,11 @@ import Services from './pages/services';
 import Settings from "./pages/Settings";
 import PetList from './pages/PetList';
 import PetDetails from './pages/PetDetails';
+import Test from './components/dashboard/dummyhome';
  export function App() {
   return <Router>
       <Routes>
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/SignUp" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -26,6 +27,7 @@ import PetDetails from './pages/PetDetails';
         <Route path="settings" element={<Settings />} />
         <Route path="/adopt-pet" element={<PetList />} />
         <Route path="/pet/:id" element={<PetDetails />} />
+        <Route path="/test" element={<Test/>}/>
 
 
       </Routes>

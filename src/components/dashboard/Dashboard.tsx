@@ -13,6 +13,7 @@ import catImg from "../../assets/banner.jpg";
 import img1 from "../../assets/user/03.jpg";
 import img2 from "../../assets/user/01.jpg";
 import img3 from "../../assets/user/07.jpg";
+import img4 from "../../assets/user/p2.jpg"
 import img7 from "../../assets/user/06.jpg";
 import img8 from "../../assets/user/07.jpg";
 import img9 from "../../assets/user/08.jpg";
@@ -31,6 +32,7 @@ const Dashboard = () => {
     { name: "Dog Lovers Club", members: "10k Members", img: img1 },
     { name: "Cat Kingdom", members: "8.5k Members", img: img2 },
     { name: "Pet Buddies", members: "6.2k Members", img: img3 },
+    { name: "Pet Kings", members: "4.2k Members", img: img4 },
   ];
 
   const openModal = () => setIsModalOpen(true);
@@ -166,7 +168,7 @@ const Dashboard = () => {
                     ))}
                   </ul>
                   <div className="mt-4 text-center">
-                    <Link to="/communities" className="text-purple-600 font-medium hover:underline">
+                    <Link to="/chats" className="text-purple-600 font-medium hover:underline">
                       See All Communities →
                     </Link>
                   </div>
@@ -202,14 +204,14 @@ const Dashboard = () => {
                   <div className="mt-4 flex gap-3">
                     {/* Report button (gradient) */}
                     <Link
-                      to="/report"
+                      to="/report-found-pet"
                       className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white text-sm font-medium shadow-md hover:opacity-90 transition"
                     >
                       Report
                     </Link>
                     {/* Found button (white with purple border) */}
                     <Link
-                      to="/found"
+                      to="/report-found-pet"
                       className="px-6 py-2 rounded-full bg-white text-purple-600 border border-purple-600 text-sm font-medium shadow-md hover:bg-purple-600 hover:text-white transition"
                     >
                       Found

@@ -1,4 +1,8 @@
 import { Community } from "./CommunityApp";
+import pet1 from "../../assets/img/adopt2.avif";
+import pet2 from "../../assets/img/adopt3.avif";
+import pet3 from "../../assets/img/adopt4.avif";
+import pet4 from "../../assets/img/adopt5.avif";
 
 interface Props {
   communities: Community[];
@@ -7,12 +11,12 @@ interface Props {
 }
 
 const categories = [
-  "Pet Lovers",
-  "Dog Owners",
-  "Cat Lovers",
-  "Pet Training",
-  "Pet Health",
-  "Adoption",
+  { name: "Pet Lovers", image:pet1},
+  { name: "Dog Owners", image:pet2},
+  { name: "Cat Lovers", image:pet3},
+  { name: "Pet Training", image:pet4},
+  { name: "Pet Health", image:pet2},
+  { name: "Adoption", image:pet1},
 ];
 
 export default function CommunityList({ communities, onCreate, onSelectCommunity }: Props) {
@@ -20,16 +24,25 @@ export default function CommunityList({ communities, onCreate, onSelectCommunity
     <>
       {/* Categories */}
       <div className="flex gap-4 overflow-x-auto">
+        {/* Create new community */}
         <div onClick={onCreate} className="flex flex-col items-center cursor-pointer">
           <div className="w-14 h-14 flex items-center justify-center rounded-full bg-purple-500 text-white text-2xl">
             +
           </div>
           <p className="text-xs mt-1">Create</p>
         </div>
+
+        {/* Category List */}
         {categories.map((cat, idx) => (
           <div key={idx} className="flex flex-col items-center">
-            <div className="w-14 h-14 rounded-full border-2 border-purple-500"></div>
-            <p className="text-xs mt-1">{cat}</p>
+            <div className="w-14 h-14 rounded-full border-2 border-purple-500 overflow-hidden">
+              <img
+                src={cat.image}
+                alt={cat.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <p className="text-xs mt-1">{cat.name}</p>
           </div>
         ))}
       </div>

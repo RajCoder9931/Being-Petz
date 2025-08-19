@@ -11,11 +11,15 @@ import Services from './pages/services';
 import Settings from "./pages/Settings";
 import PetList from './pages/PetList';
 import PetDetails from './pages/PetDetails';
-import Test from './components/dashboard/dummyhome';
- export function App() {
+import FriendRequestPanel from './pages/FriendRequestPage';
+import NotificationsPanel from './pages/NotificationsPage';
+import EditProfile from './components/Profile/Editprofile';
+import PrivacySettingsPage from './pages/PrivacySettingsPage';
+import Foundpet from './pages/Lostfound';
+  export function App() {
   return <Router>
       <Routes>
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/home" element={<DashboardPage />} />
         <Route path="/SignUp" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -27,9 +31,11 @@ import Test from './components/dashboard/dummyhome';
         <Route path="settings" element={<Settings />} />
         <Route path="/adopt-pet" element={<PetList />} />
         <Route path="/pet/:id" element={<PetDetails />} />
-        <Route path="/test" element={<Test/>}/>
-
-
+        <Route path="/friend-requests" element={<FriendRequestPanel />} />
+        <Route path="/notifications" element={<NotificationsPanel />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
+        <Route path='/report-found-pet' element={<Foundpet/>}/>
       </Routes>
     </Router>;
 }

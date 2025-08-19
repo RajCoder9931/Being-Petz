@@ -46,7 +46,7 @@ const ProfileMenu: React.FC = () => {
 
         <li>
           <Link
-            to="/account-settings"
+            to="/settings"
             className="flex items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer"
           >
             <div className="bg-purple-100 p-2 rounded-lg text-purple-500">

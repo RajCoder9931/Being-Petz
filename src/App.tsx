@@ -7,21 +7,23 @@ import Footer from './components/dashboard/Footer';
 import Profile from './components/Profile/Petprofile';
 import PetParent from './components/Profile/PetParent';
 import Chats from './components/community/CommunityApp';
-import Services from './pages/services';
+import Services from './components/services/services';
 import Settings from "./pages/Settings";
 import PetList from './pages/PetList';
 import PetDetails from './pages/PetDetails';
+import ProfilePage from './components/Profile/Profilepage';
 import FriendRequestPanel from './pages/FriendRequestPage';
 import NotificationsPanel from './pages/NotificationsPage';
 import EditProfile from './components/Profile/Editprofile';
 import PrivacySettingsPage from './pages/PrivacySettingsPage';
 import Foundpet from './pages/Lostfound';
+// import Test from "./components/Profile/dummyhome"
   export function App() {
   return <Router>
       <Routes>
         <Route path="/home" element={<DashboardPage />} />
         <Route path="/SignUp" element={<SignUpPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login"  element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/footer" element={<Footer />} />
         <Route path="/profile" element={<Profile/>}/>
@@ -32,10 +34,12 @@ import Foundpet from './pages/Lostfound';
         <Route path="/adopt-pet" element={<PetList />} />
         <Route path="/pet/:id" element={<PetDetails />} />
         <Route path="/friend-requests" element={<FriendRequestPanel />} />
+        <Route path="/profile/:id" element={<ProfilePage />} />
         <Route path="/notifications" element={<NotificationsPanel />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
         <Route path='/report-found-pet' element={<Foundpet/>}/>
+        {/* <Route path="/test" element={<Test />} /> */}
       </Routes>
     </Router>;
 }

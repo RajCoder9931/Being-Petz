@@ -74,6 +74,36 @@ const Petprofile: React.FC = () => {
         {/* Header */}
         <Header onMenuClick={toggleSidebar} />
 
+        {/* Pet Selection Section */}
+        <div className="max-w-2xl mx-auto bg-purple-100 p-6 rounded-2xl p-6 mt-6 flex items-center justify-center gap-6 flex-wrap">
+          {/* Existing Pets */}
+          {[
+            { name: "MAX", img: "Pic" },
+            { name: "Rocky", img: "Pic" },
+            { name: "Pinto", img: "Pic" },
+          ].map((pet, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
+            >
+              <div className="w-20 h-20 rounded-full border-4 border-purple-600 flex items-center justify-center text-purple-600 font-bold text-sm">
+                {pet.img}
+              </div>
+              <p className="mt-2 font-semibold text-purple-600 text-sm">{pet.name}</p>
+            </div>
+          ))}
+
+          {/* Add New Pet */}
+          <div className="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+            <div className="w-20 h-20 rounded-full border-4 border-purple-600 flex items-center justify-center text-purple-600 text-3xl">
+              +
+            </div>
+            <p className="mt-2 font-semibold text-purple-600 text-sm">Add new pet</p>
+          </div>
+        </div>
+
+
+
         {/* Profile Card */}
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mt-6 w-full">
           {/* Top Banner */}
@@ -194,11 +224,10 @@ const Petprofile: React.FC = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
-                  className={`flex-1 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors duration-200 ${
-                    activeTab === tab
+                  className={`flex-1 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors duration-200 ${activeTab === tab
                       ? "bg-purple-600 text-white"
                       : "text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
@@ -218,7 +247,7 @@ const Petprofile: React.FC = () => {
                         onClick={() => setIsEditing(true)}
                         className="px-3 py-1 "
                       >
-                        <FaEdit/>
+                        <FaEdit />
                       </button>
                     ) : (
                       <div className="flex gap-2">
@@ -440,3 +469,4 @@ const Petprofile: React.FC = () => {
 };
 
 export default Petprofile;
+

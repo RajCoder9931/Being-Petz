@@ -7,9 +7,12 @@ import vaccinationIcon from "../../assets/img/noto_calendar.png";
 import friendsIcon from "../../assets/img/Birds.png";
 import { motion } from "framer-motion";
 import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const SlideCard = ({ img, title, subtitle, bgColor }: any) => {
+
   return (
+
     <motion.div
       className="flex flex-col sm:flex-row items-center gap-3"
       initial={{ x: -100, opacity: 0 }}
@@ -46,6 +49,7 @@ const Petprofile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "records" | "reminder" | "profile"
   >("records");
+  const navigate = useNavigate(); // 👈 add this
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,32 +79,44 @@ const Petprofile: React.FC = () => {
         <Header onMenuClick={toggleSidebar} />
 
         {/* Pet Selection Section */}
-        <div className="max-w-2xl mx-auto bg-purple-100 p-6 rounded-2xl p-6 mt-6 flex items-center justify-center gap-6 flex-wrap">
-          {/* Existing Pets */}
+        <div className="max-w-2xl mx-auto bg-purple-100 p-6 rounded-2xl mt-6 flex items-center justify-center gap-6 flex-wrap">
           {[
-            { name: "MAX", img: "Pic" },
-            { name: "Rocky", img: "Pic" },
-            { name: "Pinto", img: "Pic" },
+            { name: "MAX", img: profile }, // local image import
+            { name: "Rocky", img: "https://placedog.net/201/201" }, // example external image
+            { name: "Pinto", img: "https://placedog.net/202/202" }, // example external image
           ].map((pet, idx) => (
             <div
               key={idx}
               className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
             >
-              <div className="w-20 h-20 rounded-full border-4 border-purple-600 flex items-center justify-center text-purple-600 font-bold text-sm">
-                {pet.img}
+              <div className="w-20 h-20 rounded-full border-4 border-purple-600 overflow-hidden">
+                <img
+                  src={pet.img}
+                  alt={pet.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <p className="mt-2 font-semibold text-purple-600 text-sm">{pet.name}</p>
+              <p className="mt-2 font-semibold text-purple-600 text-sm">
+                {pet.name}
+              </p>
             </div>
           ))}
 
           {/* Add New Pet */}
-          <div className="flex flex-col items-center cursor-pointer hover:scale-105 transition">
+          <div
+            className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
+            onClick={() => navigate("/petform")} // 👈 navigate to PetForm route
+          >
             <div className="w-20 h-20 rounded-full border-4 border-purple-600 flex items-center justify-center text-purple-600 text-3xl">
               +
             </div>
-            <p className="mt-2 font-semibold text-purple-600 text-sm">Add new pet</p>
+            <p className="mt-2 font-semibold text-purple-600 text-sm">
+              Add new pet
+            </p>
           </div>
+
         </div>
+
 
 
 
@@ -225,8 +241,8 @@ const Petprofile: React.FC = () => {
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
                   className={`flex-1 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors duration-200 ${activeTab === tab
-                      ? "bg-purple-600 text-white"
-                      : "text-gray-600 hover:bg-gray-200"
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}

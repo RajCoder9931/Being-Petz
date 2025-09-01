@@ -34,7 +34,7 @@ export function App() {
         <Route path="/footer" element={<Footer />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="pet-parents" element={<PetParent />} />
-        <Route path="/petform" element={<PetForm />} />
+        <Route path="/petform" element={<PetForm />} /> {/* 👈 PetForm ke liye route */}
         <Route path="chats" element={<Chats />} />
         <Route path="services" element={<Services />} />
         <Route path="settings" element={<Settings />} />

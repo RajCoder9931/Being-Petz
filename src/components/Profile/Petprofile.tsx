@@ -116,10 +116,7 @@ const Petprofile: React.FC = () => {
           </div>
 
         </div>
-
-
-
-
+ 
         {/* Profile Card */}
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mt-6 w-full">
           {/* Top Banner */}
@@ -469,9 +466,12 @@ const Petprofile: React.FC = () => {
 
                     {/* Button */}
                     <div className="text-center">
-                      <button className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-full hover:bg-purple-700 transition">
-                        Manage Records
-                      </button>
+                    <button
+      onClick={() => navigate("/managerecord")}
+      className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-full hover:bg-purple-700 transition"
+    >
+      Manage Records
+    </button>
                     </div>
                   </div>
                 </div>
@@ -485,4 +485,5 @@ const Petprofile: React.FC = () => {
 };
 
 export default Petprofile;
+ 
 

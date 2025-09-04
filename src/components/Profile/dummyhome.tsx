@@ -65,6 +65,7 @@ interface Community {
   id: number;
   name: string;
   profile: string;
+  //  : string;
 }
 
 export default function CommunityListFromAPI() {
@@ -118,3 +119,5 @@ export default function CommunityListFromAPI() {
     </div>
   );
 }
+
+ 

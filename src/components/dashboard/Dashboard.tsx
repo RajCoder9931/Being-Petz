@@ -5,7 +5,6 @@ import { FaPaw } from "react-icons/fa";
 import Header from "./Header";
 import Sidebar from "./sidebar";
 import FriendSuggestions from "./FriendSuggestions";
-import Footer from "./Footer";
 import Loader from "./Loader";
 import CreatePost from "./CreatePost";
 import PostList from "./Postlist";
@@ -151,8 +150,7 @@ const Dashboard = () => {
 
        
       <Loader />
-      <Footer />
-
+ 
     </div>
   );
 };

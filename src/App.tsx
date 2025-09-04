@@ -11,6 +11,7 @@ import Services from './components/services/services';
 import Settings from "./pages/Settings";
 import PetList from './pages/PetList';
 import PetDetails from './pages/PetDetails';
+import Managerecord from './components/Profile/Managerecords';
 import PetForm from './components/Profile/AddPetForm';
 import ProfilePage from './components/Profile/Profilepage';
 import FriendRequestPanel from './pages/FriendRequestPage';
@@ -31,8 +32,8 @@ export function App() {
         <Route path="/SignUp" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/footer" element={<Footer />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/managerecord" element={<Managerecord/>} />
         <Route path="pet-parents" element={<PetParent />} />
         <Route path="/petform" element={<PetForm />} /> {/* 👈 PetForm ke liye route */}
         <Route path="chats" element={<Chats />} />
@@ -46,8 +47,11 @@ export function App() {
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
         <Route path="/report-found-pet" element={<Foundpet />} />
+
         <Route path="/test" element={<Test />} />
       </Routes>
+      <Footer />
+
     </Router>
   );
 }

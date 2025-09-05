@@ -347,8 +347,7 @@
 //   );
 // }
 
-  // testing the image and view the community and creaotor of profile
- 
+// testing the image and view the community and creaotor of profile
 import { useState, useEffect } from "react";
 import { Community } from "./CommunityApp";
 // dummy icon images

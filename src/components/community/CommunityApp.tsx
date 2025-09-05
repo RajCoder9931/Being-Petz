@@ -147,7 +147,7 @@ export default function CommunityApp() {
       name: "Doberman Wing",
       message: "Let's meet today on green park we can play fetch...",
       time: "10:30 AM",
-      unread: 3,
+      unread: 2,
     },
     {
       id: 2,

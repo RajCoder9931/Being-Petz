@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Header from "../components/dashboard/Header";
 import Sidebar from "../components/dashboard/sidebar";
-import Footer from "../components/dashboard/Footer";  
 import petImg from "../assets/img/petprofile.jpeg";
 import ownerImg from "../assets/img/profile.jpeg";
 import { MapPin, Calendar, Trash2  } from "lucide-react";
@@ -87,9 +86,7 @@ function Profile() {
             </div>
           </div>
         </div>
-
-        {/* Footer ✅ */}
-        <Footer />
+ 
       </div>
     </div>
   );

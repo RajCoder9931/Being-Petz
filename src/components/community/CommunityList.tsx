@@ -26,7 +26,7 @@
 //   useEffect(() => {
 //     const fetchCommunities = async () => {
 //       try {
-//         const res = await fetch("https://argosmob.uk/being-petz/public/api/v1/pet/community/get");
+//         const res = await fetch("https://argosmob.com/being-petz/public/api/v1/pet/community/get");
 //         if (!res.ok) throw new Error("Failed to fetch communities");
 //         const data = await res.json();
 //         console.log("API response:", data);
@@ -72,7 +72,7 @@
 //             <div key={cat.id} className="flex flex-col items-center">
 //               <div className="w-14 h-14 rounded-full border-2 border-purple-500 overflow-hidden">
 //                 <img
-//                   src={`https://argosmob.uk/being-petz/public/${cat.profile}`}
+//                   src={`https://argosmob.com/being-petz/public/${cat.profile}`}
 //                   alt={cat.name}
 //                   className="w-full h-full object-cover"
 //                 />
@@ -157,7 +157,7 @@
 //   useEffect(() => {
 //     const fetchCommunities = async () => {
 //       try {
-//         const res = await fetch("https://argosmob.uk/being-petz/public/api/v1/pet/community/get");
+//         const res = await fetch("https://argosmob.com/being-petz/public/api/v1/pet/community/get");
 //         if (!res.ok) throw new Error("Failed to fetch communities");
 //         const data = await res.json();
 //         setCategories(data.data || []);
@@ -184,7 +184,7 @@
 //     setMessage(null);
 //     try {
 //       const res = await fetch(
-//         "https://argosmob.uk/being-petz/public/api/v1/pet/community/join",
+//         "https://argosmob.com/being-petz/public/api/v1/pet/community/join",
 //         {
 //           method: "POST",
 //           headers: {
@@ -241,7 +241,7 @@
 //             >
 //               <div className="w-14 h-14 rounded-full border-2 border-purple-500 overflow-hidden">
 //                 <img
-//                   src={`https://argosmob.uk/being-petz/public/${cat.profile}`}
+//                   src={`https://argosmob.com/being-petz/public/${cat.profile}`}
 //                   alt={cat.name}
 //                   className="w-full h-full object-cover"
 //                 />
@@ -283,7 +283,7 @@
 //             <div className="flex items-start gap-4">
 //               {/* Profile Image */}
 //               <img
-//                 src={`https://argosmob.uk/being-petz/public/${selectedCommunity.profile}`}
+//                 src={`https://argosmob.com/being-petz/public/${selectedCommunity.profile}`}
 //                 alt={selectedCommunity.name}
 //                 className="w-20 h-20 rounded-full object-cover border-2 border-purple-500"
 //               />
@@ -383,7 +383,7 @@ interface ApiCommunity {
 const getCreatorImage = (creator?: Creator) => {
   if (!creator) return maleIcon;
   if (creator.profile) {
-    return `https://argosmob.uk/being-petz/public/${creator.profile}`;
+    return `https://argosmob.com/being-petz/public/${creator.profile}`;
   }
   const name = creator.first_name.toLowerCase();
   return name.endsWith("a") || name.endsWith("i") ? femaleIcon : maleIcon;
@@ -392,7 +392,7 @@ const getCreatorImage = (creator?: Creator) => {
 // Community Profile Image
 const getCommunityImage = (profile?: string | null) => {
   if (profile) {
-    return `https://argosmob.uk/being-petz/public/${profile}`;
+    return `https://argosmob.com/being-petz/public/${profile}`;
   }
   return catIcon;
 };
@@ -448,7 +448,7 @@ export default function CommunityList({
       }
 
       try {
-        const res = await fetch("https://argosmob.uk/being-petz/public/api/v1/pet/community/get");
+        const res = await fetch("https://argosmob.com/being-petz/public/api/v1/pet/community/get");
         if (!res.ok) throw new Error("Failed to fetch communities");
         const data = await res.json();
 
@@ -475,7 +475,7 @@ export default function CommunityList({
       }
 
       try {
-        const res = await fetch("https://argosmob.uk/being-petz/public/api/v1/pet/community/joined");
+        const res = await fetch("https://argosmob.com/being-petz/public/api/v1/pet/community/joined");
         if (!res.ok) throw new Error("Failed to fetch joined communities");
         const data = await res.json();
 
@@ -506,7 +506,7 @@ export default function CommunityList({
     setMessage(null);
     try {
       const res = await fetch(
-        "https://argosmob.uk/being-petz/public/api/v1/pet/community/join",
+        "https://argosmob.com/being-petz/public/api/v1/pet/community/join",
         {
           method: "POST",
           headers: {

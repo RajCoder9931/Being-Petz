@@ -176,10 +176,10 @@ import { Link } from 'react-router-dom';
 import { FacebookIcon, TwitterIcon, InstagramIcon } from 'lucide-react';
 import CircleAnimation from '../common/CircleAnimation';
 import ImageCarousel from '../common/ImageCarousel';
-import Img1 from '../../assets/img/1.png';
-import Img2 from '../../assets/img/2.png';
-import Img3 from '../../assets/img/3.png';
-import Img4 from '../../assets/img/4.jpg';
+import Img1 from '../../assets/img/1.webp';
+import Img2 from '../../assets/img/2.avif';
+import Img3 from '../../assets/img/3.webp';
+import Img4 from '../../assets/img/4.webp';
 import logo from "../../assets/img/logo.png";
 
 function Login() {
@@ -217,7 +217,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setMessage(null);
 
   try {
-    const response = await fetch("https://argosmob.uk/being-petz/public/api/v1/auth/login", {
+    const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

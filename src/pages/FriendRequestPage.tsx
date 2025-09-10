@@ -81,7 +81,7 @@ const guessGenderFromName = (name: string) => {
     const fetchFriends = async () => {
       try {
         const response = await fetch(
-          "https://argosmob.uk/being-petz/public/api/v1/pet/friends/get",
+          "https://argosmob.com/being-petz/public/api/v1/pet/friends/get",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -121,7 +121,7 @@ const guessGenderFromName = (name: string) => {
     const fetchSuggestions = async () => {
       try {
         const response = await fetch(
-          "https://argosmob.uk/being-petz/public/api/v1/pet/friends/suggestions",
+          "https://argosmob.com/being-petz/public/api/v1/pet/friends/suggestions",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

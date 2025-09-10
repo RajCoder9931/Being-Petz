@@ -155,7 +155,7 @@ const CreatePost = () => {
         formData.append("media", file, `image_${idx}.jpg`);
       });
 
-      const res = await fetch("https://argosmob.uk/being-petz/public/api/v1/post/create", {
+      const res = await fetch("https://argosmob.com/being-petz/public/api/v1/post/create", {
         method: "POST",
         body: formData,
       });

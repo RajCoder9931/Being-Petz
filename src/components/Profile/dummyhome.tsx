@@ -1,193 +1,105 @@
-// // import { useEffect, useState } from "react";
-
-// // interface Community {
-// //   id: number;
-// //   name: string;
-// //   profile: string;
-// // }
-
-// // export default function CommunityListFromAPI() {
-// //   const [communities, setCommunities] = useState<Community[]>([]);
-// //   const [loading, setLoading] = useState(true);
-
-// //   useEffect(() => {
-// //     const fetchCommunities = async () => {
-// //       try {
-// //         const res = await fetch("https://argosmob.uk/being-petz/public/api/v1/pet/community/get");
-// //         if (!res.ok) throw new Error("Failed to fetch communities");
-// //         const data = await res.json();
-
-// //         // check API response structure
-// //         console.log("API response:", data);
-
-// //         // assuming communities are inside data.data
-// //         setCommunities(data.data || []);
-// //       } catch (err) {
-// //         console.error(err);
-// //       } finally {
-// //         setLoading(false);
-// //       }
-// //     };
-
-// //     fetchCommunities();
-// //   }, []);
-
-// //   if (loading) {
-// //     return <p className="text-center text-gray-500">Loading communities...</p>;
-// //   }
-
-// //   return (
-// //     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-// //       {communities.map((c) => (
-// //         <div
-// //           key={c.id}
-// //           className="flex flex-col items-center bg-white rounded-xl shadow p-3"
-// //         >
-// //           <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-purple-500">
-// //             <img
-// //               src= {`https://argosmob.uk/being-petz/public/${c.profile}`}
-// //               alt={c.name}
-// //               className="w-full h-full object-cover"
-              
-// //             />
-// //           </div>
-// //           <p className="mt-2 text-sm font-semibold text-purple-700">{c.name}</p>
-// //         </div>
-// //       ))}
-// //     </div>
-// //   );
-// // }
-
-
-// import { useEffect, useState } from "react";
-
-// interface Community {
-//   id: number;
-//   name: string;
-//   profile: string;
-//   //  : string;
-// }
-
-// export default function CommunityListFromAPI() {
-//   const [communities, setCommunities] = useState<Community[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchCommunities = async () => {
-//       try {
-//         const res = await fetch(
-//           "https://argosmob.uk/being-petz/public/api/v1/pet/community/get"
-//         );
-//         if (!res.ok) throw new Error("Failed to fetch communities");
-//         const data = await res.json();
-
-//         console.log("API response:", data);
-
-//         // communities inside data.data
-//         setCommunities(data.data || []);
-//       } catch (err) {
-//         console.error(err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchCommunities();
-//   }, []);
-
-//   if (loading) {
-//     return <p className="text-center text-gray-500">Loading communities...</p>;
-//   }
-
-//   return (
-//     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-//       {communities.map((c) => (
-//         <div
-//           key={c.id}
-//           className="flex flex-col items-center bg-white rounded-xl shadow p-3"
-//         >
-//           <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-purple-500">
-//             <img
-//               src={`https://argosmob.uk/being-petz/public/${c.profile}`}
-//               alt={c.name}
-//               className="w-full h-full object-cover"
-//             />
-//           </div>
-//           <p className="mt-2 text-sm font-semibold text-purple-700">{c.name}</p>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
 
-interface Banner {
+interface Friend {
   id: number;
-  desktop: string;
-  mobile: string;
+  name: string;
+  friends: string;
+  img: string | null;
+  gender: string;
 }
 
-const BannerSlider = () => {
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+const PetFriends = () => {
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [parentId, setParentId] = useState<number | null>(null);
 
+  // ✅ get logged-in user id from localStorage
   useEffect(() => {
-    axios
-      .get("https://argosmob.uk/being-petz/public/api/v1/banner/all")
-      .then((res) => {
-        if (res.data && res.data.data) {
-          const baseUrl = "https://argosmob.uk/being-petz/public/";
-          const imgs = res.data.data.map((b: any) => ({
-            id: b.id,
-            desktop: baseUrl + b.desktop_image,
-            mobile: baseUrl + b.mobile_image,
-          }));
-          console.log("Banners:", imgs);
-          setBanners(imgs);
-        }
-      })
-      .catch((err) => console.error(err));
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setParentId(parsedUser.id);
+    }
   }, []);
 
+  // ✅ fetch Pet Friends
   useEffect(() => {
-    if (banners.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [banners]);
+    if (!parentId) return;
+
+    const fetchFriends = async () => {
+      try {
+        const response = await fetch(
+          "https://argosmob.uk/being-petz/public/api/v1/pet/friends/get",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ parent_id: parentId }),
+          }
+        );
+        const data = await response.json();
+
+        if (data.status && Array.isArray(data.data)) {
+          const formatted = data.data.map((person: any) => {
+            const fullName = `${person.first_name || ""} ${person.last_name || ""}`.trim();
+            return {
+              id: person.id,
+              name: fullName,
+              friends: `${person.friends_count || 0} friends`,
+              img: person.profile
+                ? `https://argosmob.uk/being-petz/public/${person.profile}`
+                : null, // ❌ no fallback
+              gender: person.gender || "",
+            };
+          });
+          setFriends(formatted);
+        } else {
+          setFriends([]);
+        }
+      } catch (err) {
+        console.error("Error fetching friends:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFriends();
+  }, [parentId]);
 
   return (
-    <div className="relative w-full h-[400px] overflow-hidden rounded-2xl shadow-lg">
-      <AnimatePresence>
-        {banners.length > 0 && (
-          <motion.picture
-            key={currentIndex}
-            initial={{ x: "100%", opacity: 0.8 }}
-            animate={{ x: "0%", opacity: 1 }}
-            exit={{ x: "-100%", opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute w-full h-full"
-          >
-            {/* 👇 Mobile image for small screens */}
-            <source
-              media="(max-width: 768px)"
-              srcSet={banners[currentIndex].mobile}
-            />
-            {/* 👇 Desktop image */}
-            <img
-              src={banners[currentIndex].desktop}
-              alt="banner"
-              className="w-full h-full object-cover"
-            />
-          </motion.picture>
+    <div className="bg-white rounded-2xl shadow p-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-purple-700 flex items-center gap-2">
+          Pet Friends
+        </h2>
+        <button className="text-purple-600 text-sm">See All</button>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {loading ? (
+          <p className="text-gray-500">Loading friends...</p>
+        ) : friends.length > 0 ? (
+          friends.map((friend) => (
+            <div key={friend.id} className="flex items-center gap-3">
+              {friend.img ? (
+                <img
+                  src={friend.img}
+                  alt={friend.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                  ?
+                </div>
+              )}
+              <p>{friend.name}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500">No friends found</p>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 };
 
-export default BannerSlider;
+export default PetFriends;

@@ -2,8 +2,8 @@ import React from "react";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-900 text-white py-4 mt-8">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
+    <footer className="bg-gray-900 text-white py-4">
+      <div className=" container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         {/* Links */}
         <div className="flex gap-6 text-sm mb-3 md:mb-0">
           <a href="/privacy-policy" className="hover:underline">

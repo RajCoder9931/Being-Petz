@@ -14,7 +14,7 @@ import ProfileMenu from "./ProfileMenu";
 import MessagesPanel from "./MessagesPanel";
 import FriendRequestPanel from "./FriendRequestPanel";
 import NotificationsPanel from "./NotificationsPanel";
-import logo from "../../assets/img/logo.png";
+import logo from "../../assets/img/Website & Digital Branding_YouTube Banner Logo.png";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -56,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       {/* LEFT SECTION */}
       <div className="flex items-center gap-3 flex-1">
         {/* Logo */}
-        <img src={logo} alt="Logo" className="h-8 w-auto object-contain" />
+        <img src={logo} alt="Logo" className="h-10 w-55 object-contain" />
 
         {/* Sidebar Toggle */}
         <button

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
-import profile from "../../assets/img/petprofile.jpeg";
-import genderIcon from "../../assets/img/male.png";
 import vaccinationIcon from "../../assets/img/noto_calendar.png";
 import friendsIcon from "../../assets/img/Birds.png";
+import femaleIcon from "../../assets/img/female.png";
+import maleIcon from "../../assets/img/male.png";
 import { motion } from "framer-motion";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -49,16 +50,44 @@ const Petprofile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "records" | "reminder" | "profile"
   >("records");
-  const navigate = useNavigate(); // 👈 add this
-
+  const navigate = useNavigate();  
+  const [user, setUser] = useState<any>(null);
+  const [pets, setPets] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: "Tom",
+    name: "Luna",
     dob: "2020-05-15",
     breed: "German Shepherd",
     gender: "Male",
     blood: "DEA 1",
   });
+  // ✅   Login check
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user?.id || user?.user_id) {
+      const userId = user.id || user.user_id;
+      axios
+        .post("https://argosmob.com/being-petz/public/api/v1/pet/get/my", {
+          user_id: userId,
+        })
+        .then((res) => {
+          if (res.data && res.data.data) {
+            setPets(res.data.data);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching pets:", err);
+        });
+    }
+  }, [user]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -66,7 +95,28 @@ const Petprofile: React.FC = () => {
 
   const handleSave = () => {
     setIsEditing(false);
-    console.log("Saved Data:", formData); // later send to API
+    console.log("Saved Data:", formData);
+  };
+  // convert the date of birth of pets and display on the form to age
+  const calculateAge = (dob: string) => {
+    if (!dob) return "Age N/A";
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    if (years <= 0 && months <= 0) return "Just Born 🐾";
+    if (years <= 0) return `${months} Month${months > 1 ? "s" : ""} Old`;
+    if (months <= 0) return `${years} Year${years > 1 ? "s" : ""} Old`;
+
+    return `${years} Year${years > 1 ? "s" : ""} ${months} Month${months > 1 ? "s" : ""} Old`;
   };
 
   return (
@@ -80,32 +130,37 @@ const Petprofile: React.FC = () => {
 
         {/* Pet Selection Section */}
         <div className="max-w-2xl mx-auto bg-purple-100 p-6 rounded-2xl mt-6 flex items-center justify-center gap-6 flex-wrap">
-          {[
-            { name: "MAX", img: profile }, // local image import
-            { name: "Rocky", img: "https://placedog.net/201/201" }, // example external image
-            { name: "Pinto", img: "https://placedog.net/202/202" }, // example external image
-          ].map((pet, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
-            >
-              <div className="w-20 h-20 rounded-full border-4 border-purple-600 overflow-hidden">
-                <img
-                  src={pet.img}
-                  alt={pet.name}
-                  className="w-full h-full object-cover"
-                />
+          {pets.length > 0 ? (
+            pets.map((pet, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
+              >
+                <div className="w-20 h-20 rounded-full border-4 border-purple-600 overflow-hidden">
+                  <img
+                    src={
+                      pet.avatar && pet.avatar !== ""
+                        ? `https://argosmob.com/being-petz/public/${pet.avatar}`
+                        : "https://placekitten.com/200/200"
+                    }
+                    alt={pet.name}
+                    className="w-full h-full object-cover"
+                  />
+
+                </div>
+                <p className="mt-2 font-semibold text-purple-600 text-sm">
+                  {pet.name}
+                </p>
               </div>
-              <p className="mt-2 font-semibold text-purple-600 text-sm">
-                {pet.name}
-              </p>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-600">No pets found. Add a new one!</p>
+          )}
 
           {/* Add New Pet */}
           <div
             className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
-            onClick={() => navigate("/petform")} // 👈 navigate to PetForm route
+            onClick={() => navigate("/petform")}
           >
             <div className="w-20 h-20 rounded-full border-4 border-purple-600 flex items-center justify-center text-purple-600 text-3xl">
               +
@@ -114,54 +169,70 @@ const Petprofile: React.FC = () => {
               Add new pet
             </p>
           </div>
-
         </div>
- 
+
         {/* Profile Card */}
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mt-6 w-full">
-          {/* Top Banner */}
-          <div className="relative bg-gradient-to-r from-purple-500 to-purple-700 h-32 sm:h-40">
-            <svg
-              className="absolute bottom-0 left-0 w-full"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 1440 320"
-            >
-              <path
-                fill="rgba(255,255,255,0.1)"
-                d="M0,64L1440,160L1440,0L0,0Z"
-              ></path>
-            </svg>
+        {pets.length > 0 && (
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mt-6 w-full">
+            {/* Top Banner */}
+            <div className="relative bg-gradient-to-r from-purple-500 to-purple-700 h-32 sm:h-40">
+              <svg
+                className="absolute bottom-0 left-0 w-full"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 1440 320"
+              >
+                <path
+                  fill="rgba(255,255,255,0.1)"
+                  d="M0,64L1440,160L1440,0L0,0Z"
+                ></path>
+              </svg>
 
-            {/* Profile Image */}
-            <div className="absolute left-1/2 -bottom-16 transform -translate-x-1/2">
-              <img
-                src={profile}
-                alt="Profile"
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white object-cover"
-              />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="pt-20 pb-6 text-center px-4">
-            {/* Name & Gender */}
-            <h2 className="text-xl sm:text-2xl font-bold flex items-center justify-center gap-2">
-              Luna
-              <img
-                src={genderIcon}
-                alt="Male"
-                className="w-4 h-4 sm:w-5 sm:h-5"
-              />
-            </h2>
-            <p className="text-gray-500 text-xs sm:text-sm">2 Year Old</p>
-
-            {/* Breed & Weight */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mt-2 text-xs sm:text-sm text-gray-600">
-              <span>🐕 German Shepherd</span>
-              <span>⚖ 4.5 Kilograms</span>
+              {/* Profile Image */}
+              <div className="absolute left-1/2 -bottom-16 transform -translate-x-1/2">
+                <img
+                  src={
+                    pets[0].avatar
+                      ? `https://argosmob.com/being-petz/public/${pets[0].avatar}`
+                      : "https://placekitten.com/200/200"
+                  }
+                  alt={pets[0].name}
+                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white object-cover"
+                />
+              </div>
             </div>
 
-            {/* Stats */}
+            {/* Content */}
+            <div className="pt-20 pb-6 text-center px-4">
+              {/* Name & Gender */}
+              <h2 className="text-xl sm:text-2xl font-bold flex items-center justify-center gap-2">
+                {pets[0].name}
+                {pets[0].gender === "Male" ? (
+                  <img
+                    src={maleIcon}
+                    alt="Male"
+                    className="w-4 h-4 sm:w-5 sm:h-5 inline-block"
+                  />
+                ) : pets[0].gender === "Female" ? (
+                  <img
+                    src={femaleIcon}
+                    alt="Female"
+                    className="w-4 h-4 sm:w-5 sm:h-5 inline-block"
+                  />
+                ) : null}
+              </h2>
+
+
+              {/* ✅ Age from DOB */}
+              <p className="text-gray-500 text-xs sm:text-sm">
+                {calculateAge(pets[0].dob)}
+              </p>
+
+              {/* Type & Breed */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mt-2 text-xs sm:text-sm text-gray-600">
+                <span>🐾 {pets[0].type}</span>
+                <span>🐕 {pets[0].breed}</span>
+              </div>
+               {/* Stats */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
               {/* Meals */}
               <div className="flex flex-col items-center rounded-lg p-2 sm:p-3 hover:bg-purple-50 cursor-pointer">
@@ -225,8 +296,12 @@ const Petprofile: React.FC = () => {
                 </p>
               </div>
             </div>
+            </div>
+
           </div>
-        </div>
+          
+        )}
+
 
         {/* Tabs & Content */}
         <div className="p-4 sm:p-6">
@@ -419,7 +494,7 @@ const Petprofile: React.FC = () => {
                           alt="Core Vaccine"
                           className="w-full sm:w-40 h-40 rounded-lg object-cover shadow-md"
                         />
-                        <div className="flex-1 p-3 sm:p-4 rounded-lg shadow-md bg-pink-200 w-full sm:w-auto">
+                        <div className="flex-2 p-5 sm:p-4 rounded-lg  shadow-md bg-pink-200 w-full sm:w-auto">
                           <h4 className="text-xs text-gray-600">
                             Core Vaccines
                           </h4>
@@ -466,12 +541,12 @@ const Petprofile: React.FC = () => {
 
                     {/* Button */}
                     <div className="text-center">
-                    <button
-      onClick={() => navigate("/managerecord")}
-      className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-full hover:bg-purple-700 transition"
-    >
-      Manage Records
-    </button>
+                      <button
+                        onClick={() => navigate("/managerecord")}
+                        className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-full hover:bg-purple-700 transition"
+                      >
+                        Manage Records
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -485,5 +560,3 @@ const Petprofile: React.FC = () => {
 };
 
 export default Petprofile;
- 
-

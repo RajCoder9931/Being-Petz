@@ -32,10 +32,10 @@ export function App() {
         <Route path="/SignUp" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/pet-profile" element={<Profile />} />
         <Route path="/managerecord" element={<Managerecord/>} />
         <Route path="pet-parents" element={<PetParent />} />
-        <Route path="/petform" element={<PetForm />} /> {/* 👈 PetForm ke liye route */}
+        <Route path="/petform" element={<PetForm />} />  
         <Route path="chats" element={<Chats />} />
         <Route path="services" element={<Services />} />
         <Route path="settings" element={<Settings />} />

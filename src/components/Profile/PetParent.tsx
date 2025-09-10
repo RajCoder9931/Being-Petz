@@ -12,19 +12,23 @@ import PostCard from "../dashboard/Postcard";
 import { useNavigate } from "react-router-dom";
 import Pets from "./MyPets";
 
-// friend images
-import friend1 from "../../assets/user/friend1.avif";
-import friend2 from "../../assets/user/friend2.avif";
-import friend3 from "../../assets/user/friend3.avif";
-import friend4 from "../../assets/user/friend4.avif";
-import friend5 from "../../assets/user/friend5.avif";
-import friend6 from "../../assets/user/friend6.avif";
+
+interface Friend {
+  id: number;
+  name: string;
+  friends: string;
+  img: string | null;
+  gender: string;
+}
 
 function PetParentProfile() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
-
+  const [locationName, setLocationName] = useState("Fetching location...");
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [parentId, setParentId] = useState<number | null>(null);
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -38,15 +42,95 @@ function PetParentProfile() {
     }
   }, [navigate]);
 
-  // ✅ friends array add kiya
-  const friends = [
-    { img: friend1, name: "Sophia" },
-    { img: friend2, name: "Daniel" },
-    { img: friend3, name: "Emma" },
-    { img: friend4, name: "Liam" },
-    { img: friend5, name: "Olivia" },
-    { img: friend6, name: "Noah" },
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setParentId(parsedUser.id);
+    }
+  }, []);
+
+  const dummyImages = [
+    profile, // aapke assets se default image
+    img1,
+    cat,
+    parrotImg,
   ];
+
+
+  // location name
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+
+      if (parsedUser.latitude && parsedUser.longitude) {
+        fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${parsedUser.latitude}&lon=${parsedUser.longitude}&format=json`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && data.address) {
+              const { city, town, village, state } = data.address;
+
+              // ✅ Fallback logic
+              const cityName = city || town || village || "Nearby Area";
+              const stateName = state || "";
+
+              setLocationName(`${cityName}, ${stateName}`);
+            } else {
+              setLocationName("Nearby Area");
+            }
+          })
+          .catch(() => setLocationName("Nearby Area"));
+      } else {
+        setLocationName("Location not set");
+      }
+    }
+  }, []);
+  // fetch the frineds
+  useEffect(() => {
+    if (!parentId) return;
+
+    const fetchFriends = async () => {
+      try {
+        const response = await fetch(
+          "https://argosmob.com/being-petz/public/api/v1/pet/friends/get",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ parent_id: parentId }),
+          }
+        );
+        const data = await response.json();
+
+        if (data.status && Array.isArray(data.data)) {
+          const formatted = data.data.map((person: any) => {
+            const fullName = `${person.first_name || ""} ${person.last_name || ""}`.trim();
+            return {
+              id: person.id,
+              name: fullName,
+              friends: `${person.friends_count || 0} friends`,
+              img: person.profile
+                ? `https://argosmob.com/being-petz/public/${person.profile}`
+                : null, // ❌ no fallback
+              gender: person.gender || "",
+            };
+          });
+          setFriends(formatted);
+        } else {
+          setFriends([]);
+        }
+      } catch (err) {
+        console.error("Error fetching friends:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFriends();
+  }, [parentId]);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -65,9 +149,13 @@ function PetParentProfile() {
                 {user && (
                   <div className="flex items-center -mt-16">
                     <img
-                      src={user.profile || profile}
-                      alt="Profile"
-                      className="w-24 h-24 rounded-full border-4 border-white shadow"
+                      src={
+                        user.profile
+                          ? `https://argosmob.com/being-petz/public/${user.profile}`
+                          : dummyImages[Math.floor(Math.random() * dummyImages.length)]
+                      }
+                      alt={user.first_name}
+                      className="w-24 h-24 rounded-full border-4 border-white shadow object-cover"
                     />
                     <div className="ml-4">
                       <h2 className="text-2xl font-bold text-purple-700">
@@ -75,9 +163,7 @@ function PetParentProfile() {
                       </h2>
                       <div className="flex items-center text-gray-500 text-sm mt-1">
                         <MapPin size={16} className="mr-1" />
-                        {user.latitude && user.longitude
-                          ? `${user.latitude}, ${user.longitude}`
-                          : "Location not set"}
+                        {locationName}
                       </div>
                     </div>
                   </div>
@@ -167,26 +253,38 @@ function PetParentProfile() {
 
             {/* RIGHT SIDE */}
             <div className="space-y-6">
-              {/* Pet Friends */}
+              {/* Pet Friends  */}
               <div className="bg-white rounded-2xl shadow p-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-bold text-purple-700 flex items-center gap-2">
                     Pet Friends
                   </h2>
-                  <button className="text-purple-600 text-sm">See All</button>
+                  <button className="text-purple-600 text-sm"onClick={() => navigate('/friend-requests')}>See All</button>
                 </div>
 
                 <div className="mt-4 space-y-4">
-                  {friends.map((friend, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <img
-                        src={friend.img}
-                        alt={friend.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <p>{friend.name}</p>
-                    </div>
-                  ))}
+                  {loading ? (
+                    <p className="text-gray-500">Loading friends...</p>
+                  ) : friends.length > 0 ? (
+                    friends.map((friend) => (
+                      <div key={friend.id} className="flex items-center gap-3">
+                        {friend.img ? (
+                          <img
+                            src={friend.img}
+                            alt={friend.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                            ?
+                          </div>
+                        )}
+                        <p>{friend.name}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No friends found</p>
+                  )}
                 </div>
               </div>
 
@@ -259,4 +357,4 @@ function PetParentProfile() {
 
 export default PetParentProfile;
 
- 
+

@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FacebookIcon, TwitterIcon, InstagramIcon } from 'lucide-react';
 import CircleAnimation from '../common/CircleAnimation';
 import ImageCarousel from '../common/ImageCarousel';
-import Img1 from '../../assets/img/1.png';
-import Img2 from '../../assets/img/2.png';
-import Img3 from '../../assets/img/3.png';
-import Img4 from '../../assets/img/4.jpg';
+import Img1 from '../../assets/img/1.webp';
+import Img2 from '../../assets/img/2.avif';
+import Img3 from '../../assets/img/3.webp';
+import Img4 from '../../assets/img/4.webp';
 import logo from "../../assets/img/logo.png";
 
 const SignUp = () => {
@@ -24,6 +24,12 @@ const SignUp = () => {
   const [statusType, setStatusType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // OTP States
+  const [otpModalOpen, setOtpModalOpen] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+
   const carouselItems = [
     { image: Img1, title: 'Welcome Back', description: 'Log in to your account to manage your pets and events.' },
     { image: Img2, title: 'Missed You', description: 'Your pets have been waiting for your return!' },
@@ -39,6 +45,7 @@ const SignUp = () => {
     });
   };
 
+  // Handle Signup
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -65,10 +72,11 @@ const SignUp = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (response.ok && data.status) {
+        setUserId(data.data.id); // store user_id
+        setOtpModalOpen(true);   // open OTP modal
         setStatusType('success');
-        setStatusMessage('Signup Successful! Redirecting...');
-        setTimeout(() => navigate("/home"), 1500);
+        setStatusMessage('OTP sent to your email.');
       } else {
         setStatusType('error');
         setStatusMessage(data.message || 'Signup Failed. Please try again.');
@@ -81,10 +89,66 @@ const SignUp = () => {
     }
   };
 
+  // Handle OTP Verification
+  const handleVerifyOtp = async () => {
+    if (!otp || !userId) return;
+
+    try {
+      const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/register-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, otp })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        alert("User verified successfully!");
+        setOtpModalOpen(false);
+        navigate("/login");  
+      } else {
+        alert(data.message || "Invalid OTP, please try again.");
+      }
+    } catch (error) {
+      alert("Something went wrong while verifying OTP.");
+    }
+  };
+
+  // Handle Resend OTP
+  const handleResendOtp = async () => {
+    if (!userId) return;
+    setResendLoading(true);
+
+    try {
+      const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        alert("📩 OTP resent to your email.");
+      } else {
+        alert(data.message || "Failed to resend OTP.");
+      }
+    } catch (error) {
+      alert("Something went wrong while resending OTP.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full">
       {/* Left side with purple gradient and promo content */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-purple-600 to-purple-400 flex-col items-center justify-center p-10 text-white relative overflow-hidden">
+      <div className="hidden md:flex md:w-1/2   bg-gradient-to-br from-purple-600 to-purple-400 flex-col items-center justify-center p-10 text-white relative overflow-hidden">
         <CircleAnimation />
         <div className="z-10 flex flex-col items-center">
           <img src={logo} alt="Being Petz Logo" className="w-48 mb-10" />
@@ -98,7 +162,7 @@ const SignUp = () => {
       <div className="w-full md:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Sign Up</h1>
-          <p className="text-gray-600 mb-8">Enter your details to access admin panel.</p>
+          <p className="text-gray-600 mb-8">Enter your details to Signup Your Account.</p>
 
           <form onSubmit={handleSubmit}>
             {/* First Name */}
@@ -218,8 +282,53 @@ const SignUp = () => {
           </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      {otpModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Verify Email</h2>
+            <p className="text-gray-600 mb-4">Enter the OTP sent to your registered email.</p>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <div className="flex justify-between items-center mb-4">
+              <button
+                onClick={handleResendOtp}
+                disabled={resendLoading}
+                className="text-sm text-purple-600 hover:underline"
+              >
+                {resendLoading ? "Resending..." : "Resend OTP"}
+              </button>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setOtpModalOpen(false)}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleVerifyOtp}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              >
+                Verify
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default SignUp;
+
+
+
+
+

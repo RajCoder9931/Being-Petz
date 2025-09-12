@@ -162,7 +162,7 @@ export default function CreateCommunityForm({ onClose, onCreated }: Props) {
             required
           />
 
-          {/* ✅ Hidden Created By (auto-filled from login user) */}
+          {/* Hidden Created By (auto-filled from login user) */}
           <input type="hidden" name="created_by" value={formData.created_by} />
 
           {/* Upload Profile Image */}

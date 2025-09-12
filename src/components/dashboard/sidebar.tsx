@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       window.addEventListener("scroll", handleScroll);
     }
-    // cleanup
+       
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };

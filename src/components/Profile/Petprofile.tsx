@@ -222,7 +222,7 @@ const Petprofile: React.FC = () => {
               </h2>
 
 
-              {/* ✅ Age from DOB */}
+              {/*  Age from DOB */}
               <p className="text-gray-500 text-xs sm:text-sm">
                 {calculateAge(pets[0].dob)}
               </p>

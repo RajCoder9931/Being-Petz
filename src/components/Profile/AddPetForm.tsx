@@ -1,10 +1,12 @@
 import { useState } from "react";
+
 interface AddPetFormProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   userId: number | null;
   onPetAdded: (pet: any) => void;
 }
+
 const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdded }) => {
   const [loading, setLoading] = useState(false);
   const [newPet, setNewPet] = useState({
@@ -23,12 +25,14 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
     const { name, value } = e.target;
     setNewPet((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setNewPet((prev) => ({ ...prev, imgFile: file }));
     }
   };
+
   const handleAddPet = async () => {
     if (!newPet.name || !newPet.type) {
       alert("Please enter at least Name and Type.");
@@ -38,6 +42,7 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
       alert("User not found. Please login again.");
       return;
     }
+    // send data to Api
     setLoading(true);
     try {
       const formData = new FormData();
@@ -63,10 +68,11 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
         return;
       }
 
-      const addedPet = data.data || {
+      let addedPet = data.data || {
         ...newPet,
         avatar: newPet.imgFile ? URL.createObjectURL(newPet.imgFile) : null,
       };
+
 
       if (addedPet.avatar && !addedPet.avatar.startsWith("http")) {
         addedPet.avatar = `https://argosmob.com/being-petz/public/${addedPet.avatar}`;
@@ -74,6 +80,7 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
 
       onPetAdded(addedPet);
 
+      // Reset form
       setNewPet({
         name: "",
         type: "",
@@ -85,7 +92,7 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
       });
 
       setOpen(false);
-      alert("Pet added successfully ✅");
+      alert("Pet added successfully ");
     } catch (error) {
       console.error("Error adding pet:", error);
       alert("Failed to add pet. Please try again.");
@@ -164,6 +171,14 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
           onChange={handleFileChange}
           className="w-full mb-4"
         />
+
+        {newPet.imgFile && (
+          <img
+            src={URL.createObjectURL(newPet.imgFile)}
+            alt="Preview"
+            className="w-32 h-32 object-cover rounded mb-4"
+          />
+        )}
 
         <div className="flex justify-end gap-2">
           <button

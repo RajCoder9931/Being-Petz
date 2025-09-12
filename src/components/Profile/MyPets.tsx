@@ -3,7 +3,7 @@ import { Heart } from "lucide-react";
 import cat1 from "../../assets/img/cat.jpg";
 import cat2 from "../../assets/img/2.avif";
 import cat3 from "../../assets/img/3.webp";
-import AddPetForm from "./AddPetForm"; 
+import AddPetForm from "./AddPetForm";
 
 const MyPets = () => {
   const [open, setOpen] = useState(false);
@@ -64,12 +64,15 @@ const MyPets = () => {
         <p className="text-gray-500 mt-4">Loading pets...</p>
       ) : pets.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+
           {pets.map((pet: any, i) => (
             <div key={i} className="bg-gray-50 rounded-xl shadow overflow-hidden">
               <img
                 src={
                   pet.avatar
-                    ? `https://argosmob.com/being-petz/public/${pet.avatar}`
+                    ? pet.avatar.startsWith("http")
+                      ? pet.avatar
+                      : `https://argosmob.com/being-petz/public/${pet.avatar}`
                     : dummyImages[i % dummyImages.length]
                 }
                 alt={pet.name}
@@ -95,7 +98,7 @@ const MyPets = () => {
         <p className="text-gray-500 mt-4">No pets found. Add your first pet!</p>
       )}
 
-       {/* Add Pet Form Modal */}
+      {/* Add Pet Form Modal */}
       {open && (
         <AddPetForm
           open={open}

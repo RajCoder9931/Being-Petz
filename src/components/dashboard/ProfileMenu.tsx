@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Edit, Settings, Lock, LogOut } from 'lucide-react';
+import profile from "../../assets/img/profile.jpeg";
+import img1 from "../../assets/user/03.jpg";
+import cat from "../../assets/img/cat.jpg";
+import parrotImg from "../../assets/user/p4.jpg";
 
 interface UserData {
   first_name: string;
@@ -12,6 +16,9 @@ interface UserData {
 const ProfileMenu: React.FC = () => {
   const [user, setUser] = useState<UserData | null>(null);
 
+  // Dummy images
+  const dummyImages = [profile, img1, cat, parrotImg];
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -19,20 +26,32 @@ const ProfileMenu: React.FC = () => {
     }
   }, []);
 
+  //fetch the image by url of profile
+  const getProfileImage = () => {
+    if (user?.profile) {
+
+      return user.profile.startsWith("http")
+        ? user.profile
+        : `https://argosmob.com/being-petz/public/${user.profile}`;
+    }
+    // dummy images 
+    return dummyImages[Math.floor(Math.random() * dummyImages.length)];
+  };
+
   return (
     <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg overflow-hidden z-50">
       {/* Header */}
       <div className="bg-purple-600 text-white p-4 flex items-center gap-3">
         {/* Profile Picture */}
-        {user?.profile ? (
+        {user ? (
           <img
-            src={user.profile}
+            src={getProfileImage()}
             alt="Profile"
-            className="w-12 h-12 rounded-full border-2 border-white"
+            className="w-12 h-12 rounded-full border-2 border-white object-cover"
           />
         ) : (
           <div className="w-12 h-12 rounded-full bg-purple-400 flex items-center justify-center text-xl font-bold">
-            {user?.first_name?.charAt(0) || "U"}
+            U
           </div>
         )}
 
@@ -57,7 +76,9 @@ const ProfileMenu: React.FC = () => {
             </div>
             <div>
               <p className="font-medium text-gray-800">My Profile</p>
-              <p className="text-sm text-gray-500">{user?.email || "View personal profile details."}</p>
+              <p className="text-sm text-gray-500">
+                {user?.email || "View personal profile details."}
+              </p>
             </div>
           </Link>
         </li>

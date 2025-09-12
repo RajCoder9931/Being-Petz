@@ -116,7 +116,7 @@ const PostCard: React.FC<PostCardProps> = ({
       {/* Stats */}
       <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
         <div className="flex gap-2 items-center">
-          <span>👍 ❤️</span>
+          <span> </span>
           <span>{likeCount} Likes</span>
         </div>
         <div className="flex gap-4">
@@ -133,13 +133,13 @@ const PostCard: React.FC<PostCardProps> = ({
             isLiked ? "text-blue-600 font-semibold" : "hover:bg-gray-100"
           }`}
         >
-          👍 {isLiked ? "Liked" : "Like"}
+          {isLiked ? "Liked" : "Like"}
         </div>
         <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded">
-          💬 Comment
+           Comment
         </div>
         <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded">
-          ↗️ Share
+           Share
         </div>
       </div>
 

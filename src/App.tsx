@@ -19,15 +19,14 @@ import NotificationsPanel from './pages/NotificationsPage';
 import EditProfile from './components/Profile/Editprofile';
 import PrivacySettingsPage from './pages/PrivacySettingsPage';
 import Foundpet from './pages/Lostfound';
-import Test from "./components/Profile/dummyhome";
-
+// import Test from "./components/Profile/dummyhome";
+import ChartTest from "./components/community/dummycharts";
 export function App() {
   return (
     <Router>
       <Routes>
         {/* Default route -> Login Page */}
-        <Route path="/" element={<Navigate to="/login" />} />
-
+        <Route path="/" element={<Navigate to="/login" />} /> 
         <Route path="/home" element={<DashboardPage />} />
         <Route path="/SignUp" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -47,8 +46,7 @@ export function App() {
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
         <Route path="/report-found-pet" element={<Foundpet />} />
-
-        <Route path="/test" element={<Test />} />
+ 
       </Routes>
       <Footer />
 

@@ -51,7 +51,7 @@ function PetParentProfile() {
   }, []);
 
   const dummyImages = [
-    profile, // aapke assets se default image
+    profile,  // deult image
     img1,
     cat,
     parrotImg,
@@ -74,7 +74,7 @@ function PetParentProfile() {
             if (data && data.address) {
               const { city, town, village, state } = data.address;
 
-              // ✅ Fallback logic
+              // Fallback logic
               const cityName = city || town || village || "Nearby Area";
               const stateName = state || "";
 
@@ -114,7 +114,7 @@ function PetParentProfile() {
               friends: `${person.friends_count || 0} friends`,
               img: person.profile
                 ? `https://argosmob.com/being-petz/public/${person.profile}`
-                : null, // ❌ no fallback
+                : null,  
               gender: person.gender || "",
             };
           });

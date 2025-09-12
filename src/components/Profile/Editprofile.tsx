@@ -3,13 +3,7 @@ import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
 import profile from "../../assets/img/profile.jpeg";
 
-const Footer: React.FC = () => (
-  <footer className="bg-gray-800 text-white text-center py-3 mt-6">
-    <p className="text-sm">
-      © {new Date().getFullYear()} Pet Community. All rights reserved.
-    </p>
-  </footer>
-);
+ 
 
 const EditProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState("personal");
@@ -295,9 +289,7 @@ const EditProfile: React.FC = () => {
           </div>
         </main>
 
-        {/* Footer */}
-        <Footer />
-      </div>
+        </div>
     </div>
   );
 };

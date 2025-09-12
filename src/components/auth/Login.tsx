@@ -26,8 +26,8 @@ function Login() {
     { image: Img3, title: 'Stay Connected', description: 'Keep up with the latest events and pet care tips.' },
     { image: Img4, title: 'Pet Community', description: 'Join thousands of pet owners sharing their experiences.' }
   ];
-
-  // its handle the input and chnage the value in state
+ // the changet the image on using state 
+ 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FacebookIcon, TwitterIcon, InstagramIcon } from 'lucide-react';
-import CircleAnimation from '../common/CircleAnimation';
+ import CircleAnimation from '../common/CircleAnimation';
 import ImageCarousel from '../common/ImageCarousel';
 import Img1 from '../../assets/img/1.webp';
 import Img2 from '../../assets/img/2.avif';
@@ -16,7 +15,6 @@ const SignUp = () => {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
     acceptTerms: false
   });
 
@@ -66,15 +64,14 @@ const SignUp = () => {
           first_name: formData.firstName,
           last_name: formData.lastName,
           email: formData.email,
-          password: formData.password
         })
       });
 
       const data = await response.json();
 
       if (response.ok && data.status) {
-        setUserId(data.data.id); // store user_id
-        setOtpModalOpen(true);   // open OTP modal
+        setUserId(data.data.id); 
+        setOtpModalOpen(true);    
         setStatusType('success');
         setStatusMessage('OTP sent to your email.');
       } else {
@@ -127,14 +124,13 @@ const SignUp = () => {
           first_name: formData.firstName,
           last_name: formData.lastName,
           email: formData.email,
-          password: formData.password
         })
       });
 
       const data = await response.json();
 
       if (response.ok && data.status) {
-        alert("📩 OTP resent to your email.");
+        alert(" OTP resent to your email.");
       } else {
         alert(data.message || "Failed to resend OTP.");
       }
@@ -161,8 +157,8 @@ const SignUp = () => {
       {/* Right side with sign up form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Sign Up</h1>
-          <p className="text-gray-600 mb-8">Enter your details to Signup Your Account.</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Create Account</h1>
+          <p className="text-gray-600 mb-8">Welcome! Please enter your information below and get started.</p>
 
           <form onSubmit={handleSubmit}>
             {/* First Name */}
@@ -210,21 +206,6 @@ const SignUp = () => {
               />
             </div>
 
-            {/* Password */}
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Password"
-                required
-              />
-            </div>
-
             {/* Terms */}
             <div className="flex items-center mb-6">
               <input
@@ -236,10 +217,11 @@ const SignUp = () => {
                 className="mr-2"
                 required
               />
+
               <label htmlFor="acceptTerms" className="text-gray-700">
-                I accept{' '}
+                I accept Terms and Conditions {' '}
                 <span className="text-purple-600 hover:underline">
-                  Terms and Conditions
+                  Read Now 
                 </span>
               </label>
             </div>
@@ -250,35 +232,24 @@ const SignUp = () => {
                 {statusMessage}
               </p>
             )}
-
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 disabled:opacity-60"
             >
-              {loading ? "Signing Up..." : "Sign Up"}
-            </button>
+              {loading ? "Signing Up..." : "Create Account"}
+            </button>  
           </form>
 
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-gray-600">
-              Already Have Account?{' '}
+              Already Have An Account?{' '}
               <Link to="/login" className="text-purple-600 hover:underline">
-                Log In
+                Login here!
               </Link>
             </p>
-            <div className="flex justify-center mt-6 space-x-4">
-              <a href="#" className="p-2 bg-purple-100 rounded-md text-purple-600 hover:bg-purple-200 transition duration-300">
-                <FacebookIcon size={20} />
-              </a>
-              <a href="#" className="p-2 bg-purple-100 rounded-md text-purple-600 hover:bg-purple-200 transition duration-300">
-                <TwitterIcon size={20} />
-              </a>
-              <a href="#" className="p-2 bg-purple-100 rounded-md text-purple-600 hover:bg-purple-200 transition duration-300">
-                <InstagramIcon size={20} />
-              </a>
-            </div>
+             
           </div>
         </div>
       </div>

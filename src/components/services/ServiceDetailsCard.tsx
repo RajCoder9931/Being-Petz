@@ -1,4 +1,6 @@
-import { Phone, Mail, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Phone, Mail, MapPin, Bookmark, Search, X } from "lucide-react";
+import axios from "axios";
 
 interface ServiceDetailsCardProps {
   service: string;
@@ -7,134 +9,203 @@ interface ServiceDetailsCardProps {
 }
 
 interface Provider {
+  id: number;
   name: string;
   contactPerson: string;
-  phone: string;
+  contactNumber: string;
   email: string;
   address: string;
-  details: string[];
+  details: { label: string; value: string }[];
 }
 
 export default function ServiceDetailsCard({ service, onBook, onClose }: ServiceDetailsCardProps) {
-  const getProviders = (): Provider[] => {
-    switch (service) {
-      case "Pet Training":
-        return [
-          {
-            name: "Pawsitive Training Co.",
-            contactPerson: "Amit Sharma",
-            phone: "9876543210",
-            email: "amit@pawsitive.com",
-            address: "101 Main St, Sector 5, Delhi",
-            details: ["Certifications: ABC Certified Trainer", "Experience: 4-6 years", "License: Pet Board License"]
-          },
-          {
-            name: "Canine Masters",
-            contactPerson: "Rohit Verma",
-            phone: "9823456789",
-            email: "rohit@caninemasters.com",
-            address: "45 Dog St, Gurgaon",
-            details: ["Experience: 7 years", "Specialization: Guard Dogs", "License: K9 Board Approved"]
-          },
-          {
-            name: "Happy Tails Training",
-            contactPerson: "Neha Gupta",
-            phone: "9811223344",
-            email: "neha@happytails.com",
-            address: "23 Park Rd, Noida",
-            details: ["Positive Reinforcement", "Obedience & Tricks", "Experience: 5 years"]
-          }
-        ];
-      
-      case "Pet Store":
-        return [
-          {
-            name: "Happy Paws Store",
-            contactPerson: "Ramesh Kumar",
-            phone: "9811122233",
-            email: "store@happypaws.com",
-            address: "22 Market Rd, Noida",
-            details: ["Categories: Food, Toys, Accessories", "Delivery: Available", "Timings: 9 AM – 9 PM"]
-          },
-          {
-            name: "Pet Bazaar",
-            contactPerson: "Suresh Yadav",
-            phone: "9876549876",
-            email: "info@petbazaar.com",
-            address: "Mall Road, Delhi",
-            details: ["Premium Food Brands", "Aquarium Section", "Open: 10 AM – 10 PM"]
-          },
-          {
-            name: "Furry Mart",
-            contactPerson: "Priya Sharma",
-            phone: "9800112233",
-            email: "support@furrymart.com",
-            address: "Sector 14, Gurgaon",
-            details: ["Vet Medicines", "Pet Grooming Products", "Discounts on Bulk Orders"]
-          }
-        ];
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [filteredProviders, setFilteredProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
-      case "Grooming":
-        return [
-          {
-            name: "Furry Friends Grooming",
-            contactPerson: "Priya Mehta",
-            phone: "9876001122",
-            email: "grooming@furryfriends.com",
-            address: "55 Park Ave, Gurgaon",
-            details: ["Haircut", "Nail Clipping", "Spa & Bath"]
-          },
-          {
-            name: "Pawfect Groomers",
-            contactPerson: "Arjun Singh",
-            phone: "9811778899",
-            email: "info@pawfect.com",
-            address: "MG Road, Delhi",
-            details: ["Full Grooming Package", "De-shedding", "Ear Cleaning"]
-          },
-          {
-            name: "Pet Style Studio",
-            contactPerson: "Sneha Kapoor",
-            phone: "9822334455",
-            email: "studio@petstyle.com",
-            address: "Rajouri Garden, Delhi",
-            details: ["Creative Grooming", "Puppy Spa", "Teeth Cleaning"]
-          }
-        ];
-
-      case "Pet Shelter":
-        return [
-          {
-            name: "Pawsitive Sanctuary",
-            contactPerson: "Amit Sharma",
-            phone: "9876543210",
-            email: "shelter@pawsitive.com",
-            address: "101 Main St, Sector 5, Delhi",
-            details: ["Adoption Programs", "Medical Aid", "Volunteering"]
-          },
-          {
-            name: "Canine Sanctuary",
-            contactPerson: "Rohit Verma",
-            phone: "9823456789",
-            email: "shelter@canine.com",
-            address: "45 Dog St, Gurgaon",
-            details: ["Rescue & Rehab", "Pet Foster Care", "Awareness Programs"]
-          },
-          {
-            name: "Happy Tails Sanctuary",
-            contactPerson: "Neha Gupta",
-            phone: "9811223344",
-            email: "shelter@happytails.com",
-            address: "23 Park Rd, Noida",
-            details: ["Emergency Shelter", "Food & Medicine Supply", "Adoption Drives"]
-          }
-        ];
-      default:
-        return [];
-    }
+  const apiMap: Record<string, string> = {
+    "Pet Store": "https://argosmob.com/being-petz/public/api/v1/pet/shops",
+    "Grooming": "https://argosmob.com/being-petz/public/api/v1/pet/groomers",
+    "Pet Training": "https://argosmob.com/being-petz/public/api/v1/pet/trainers",
+    "Pet Walking": "https://argosmob.com/being-petz/public/api/v1/pet/walkers",
+    "Pet Behaviourists": "https://argosmob.com/being-petz/public/api/v1/pet/behaviourists",
+    "Pet Resort": "https://argosmob.com/being-petz/public/api/v1/pet/resorts",
+    "Pet Shelter": "https://argosmob.com/being-petz/public/api/v1/pet/shelters",
+    "Pet Sitting": "https://argosmob.com/being-petz/public/api/v1/pet/sitters",
+    "Pet Walkers": "https://argosmob.com/being-petz/public/api/v1/pet/walkers",
   };
 
-  const providers = getProviders();
+  const mapApiDataToProviders = (data: any[], service: string): Provider[] => {
+    return data.map((item, index) => {
+      switch (service) {
+        case "Pet Training":
+          return {
+            id: index,
+            name: item.training_business_name ?? "Unknown Trainer",
+            contactPerson: item.trainer_name ?? "N/A",
+            contactNumber: item.contact_number ?? "N/A",
+            email: item.email ?? "N/A",
+            address: item.address_line1 ?? "N/A",
+            details: [
+              { label: "Certifications", value: item.certifications ?? "N/A" },
+              { label: "Experience", value: item.experience ?? "N/A" },
+              { label: "Licenses", value: item.licenses ?? "N/A" },
+            ],
+          };
+        case "Pet Store":
+          return {
+            id: index,
+            name: item.shop_name ?? "Unknown Store",
+            contactPerson: item.owner_name ?? "N/A",
+            contactNumber: item.contact_number ?? "N/A",
+            email: item.email ?? "N/A",
+            address: item.address_line_1 ?? "N/A",
+            details: [
+              { label: "Registration Number", value: item.registration_number ?? "N/A" },
+              { label: "GST No", value: item.gst_number ?? "N/A" },
+              { label: "Licenses", value: item.licenses ?? "N/A" },
+            ],
+          };
+        case "Grooming":
+          return {
+            id: index,
+            name: item.business_name?? "Unknown Groomer",
+            contactPerson: item.owner_name ?? "N/A",
+            contactNumber: item.contact_number ?? "N/A",
+            email: item.email ?? "N/A",
+            address: item.address_line1 ?? "N/A",
+            details: [
+              { label: "Certifications", value: item.certifications ?? "N/A" },
+              { label: "Experience", value: item.experience_range ?? "N/A" },
+              { label: "Licenses", value: item.licenses ?? "N/A" },
+            ],
+          };
+          case "Pet Shelter":
+            return {
+              id: index,
+              name: item.shelter_name?? "Unknown Groomer",
+              contactPerson: item.owner_name ?? "N/A",
+              contactNumber: item.contact_number ?? "N/A",
+              email: item.email ?? "N/A",
+              address: item.address_line1 ?? "N/A",
+              details: [
+                { label: "Registration Number", value: item.legal_registration_number ?? "N/A" },
+                { label: "Experience", value: item.years_of_operation ?? "N/A" },
+                { label: "Ngo Collaboration", value: item.ngo_collaboration ?? "N/A" },
+              ],
+            };
+            case "Pet Sitting":
+            return {
+              id: index,
+              name: item.business_name?? "Unknown Groomer",
+              contactPerson: item.owner_name ?? "N/A",
+              contactNumber: item.contact_number ?? "N/A",
+              email: item.email ?? "N/A",
+              address: item.address_line1 ?? "N/A",
+              details: [
+                { label: "Certifications", value: item.certifications ?? "N/A" },
+                { label: "Experience", value: item.experience ?? "N/A" },
+                { label: "Licenses", value: item.licenses ?? "N/A" },
+              ],
+            };
+            case "Pet Walkers":
+            return {
+              id: index,
+              name: item.business_name?? "Unknown Groomer",
+              contactPerson: item.walker_name ?? "N/A",
+              contactNumber: item.contact_number ?? "N/A",
+              email: item.email ?? "N/A",
+              address: item.address_line1 ?? "N/A",
+              details: [
+                { label: "Certifications", value: item.certifications ?? "N/A" },
+                { label: "Experience", value: item.experience ?? "N/A" },
+                { label: "Licenses", value: item.licenses ?? "N/A" },
+              ],
+            };
+            case "Pet Behaviourists":
+            return {
+              id: index,
+              name: item.business_name?? "Unknown Groomer",
+              contactPerson: item.full_name?? "N/A",
+              contactNumber: item.contact_number ?? "N/A",
+              email: item.email ?? "N/A",
+              address: item.address_line1 ?? "N/A",
+              details: [
+                { label: "Certifications", value: item.certifications ?? "N/A" },
+                { label: "Experience", value: item.experience ?? "N/A" },
+                { label: "Licenses", value: item.licenses ?? "N/A" },
+              ],
+            };
+            case "Pet Resort":
+            return {
+              id: index,
+              name: item.resort_name?? "Unknown Groomer",
+              contactPerson: item.owner_name?? "N/A",
+              contactNumber: item.contact_number ?? "N/A",
+              email: item.email ?? "N/A",
+              address: item.address_line1 ?? "N/A",
+              details: [
+                { label: "Certifications", value: item.certifications ?? "N/A" },
+                { label: "Experience", value: item.experience_years ?? "N/A" },
+                { label: "Registration Number", value: item.registration_number ?? "N/A" },
+              ],
+            };
+
+        default:
+          return {
+            id: index,
+            name: "Unknown",
+            contactPerson: "N/A",
+            contactNumber: "N/A",
+            email: "N/A",
+            address: "N/A",
+            details: [],
+          };
+      }
+    });
+  };
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      const url = apiMap[service];
+      if (!url) return;
+
+      try {
+        setLoading(true);
+        const res = await axios.get(url);
+        if (res.data?.data) {
+          const mappedProviders = mapApiDataToProviders(res.data.data, service);
+          setProviders(mappedProviders);
+          setFilteredProviders(mappedProviders);
+        }
+      } catch (err) {
+        console.error("Error fetching:", err);
+        setProviders([]);
+        setFilteredProviders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, [service]);
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setFilteredProviders(providers);
+      return;
+    }
+    const filtered = providers.filter((p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredProviders(filtered);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setFilteredProviders(providers);
+  };
 
   return (
     <div className="bg-white rounded-lg w-full max-w-6xl shadow-lg overflow-y-auto max-h-[90vh]">
@@ -143,41 +214,97 @@ export default function ServiceDetailsCard({ service, onBook, onClose }: Service
         <button onClick={onClose} className="text-gray-500">✖</button>
       </div>
 
-      {providers.length === 0 ? (
+      {/* Search Section */}
+      <div className="flex gap-2 p-4 border-b relative">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 border rounded px-3 py-2 focus:outline-purple-500"
+        />
+        {searchQuery && (
+          <button
+            onClick={handleClearSearch}
+            className="absolute right-16 top-1/2 -translate-y-1/2 text-gray-500"
+          >
+            <X size={16} />
+          </button>
+        )}
+        <button
+          onClick={handleSearch}
+          className="bg-purple-600 text-white px-4 py-2 rounded flex items-center gap-1"
+        >
+          <Search size={16} /> Search
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="p-6 text-gray-500">Loading...</p>
+      ) : filteredProviders.length === 0 ? (
         <p className="p-6">No details available.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-          {providers.map((provider, index) => (
-            <div key={index} className="p-4 border rounded-lg shadow-sm space-y-2 flex flex-col justify-between">
+          {filteredProviders.map((p) => (
+            <div key={p.id} className="p-4 border rounded-xl shadow space-y-3 bg-white">
               <div>
-                <h3 className="text-lg font-semibold">{provider.name}</h3>
-                <p className="text-gray-600">Contact: {provider.contactPerson}</p>
-
-                <div className="text-sm text-gray-700 space-y-1 mt-2">
-                  <p className="flex items-center gap-2"><Phone size={16}/> {provider.phone}</p>
-                  <p className="flex items-center gap-2"><Mail size={16}/> {provider.email}</p>
-                  <p className="flex items-center gap-2"><MapPin size={16}/> {provider.address}</p>
-                </div>
-
-                <ul className="list-disc list-inside text-sm text-gray-700 mt-2">
-                  {provider.details.map((d, i) => (
-                    <li key={i}>{d}</li>
-                  ))}
-                </ul>
+                <h3 className="text-lg font-bold text-gray-900">{p.name}</h3>
+                <p className="text-gray-600 text-sm">Trainer: {p.contactPerson}</p>
               </div>
+
+              <div className="text-sm text-gray-700 space-y-2 border-b pb-2">
+                <p className="flex items-center gap-2 text-purple-600">
+                  <Phone size={16} /> 
+                  <a href={`tel:${p.contactNumber}`} className="hover:underline">
+                    {p.contactNumber}
+                  </a>
+                </p>
+                <p className="flex items-center gap-2 text-purple-600">
+                  <Mail size={16} /> 
+                  <a href={`mailto:${p.email}`} className="hover:underline">
+                    {p.email}
+                  </a>
+                </p>
+                <p className="flex items-center gap-2 text-purple-600">
+                  <MapPin size={16} /> {p.address}
+                </p>
+              </div>
+
+              {p.details.length > 0 && (
+                <div>
+                  <h4 className="text-purple-700 font-semibold mb-1">
+                    {service} Details
+                  </h4>
+                  <ul className="space-y-1 text-sm text-gray-800">
+                    {p.details.map((d, i) => (
+                      <li key={i}>
+                        <span className="font-medium">{d.label}:</span> {d.value}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="flex gap-2 pt-3">
                 <a
-                  href={`tel:${provider.phone}`}
-                  className="bg-green-500 text-white px-3 py-1 rounded text-sm flex-1 text-center"
+                  href={`tel:${p.contactNumber}`}
+                  className="bg-purple-600 text-white px-3 py-2 rounded flex-1 text-center"
                 >
                   Call
                 </a>
-                <button
-                  className="bg-purple-600 text-white px-3 py-1 rounded text-sm flex-1"
-                  onClick={() => onBook(provider.name)}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-green-500 text-white px-3 py-2 rounded flex-1 text-center"
                 >
-                  Book
+                  Directions
+                </a>
+                <button
+                  className="bg-orange-500 text-white px-3 py-2 rounded flex-1 flex items-center justify-center gap-1"
+                  onClick={() => onBook(p.name)}
+                >
+                  <Bookmark size={16}/> Save
                 </button>
               </div>
             </div>

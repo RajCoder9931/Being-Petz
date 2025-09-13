@@ -3,19 +3,17 @@ import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
 import Banner from "../../assets/banner.jpg";
 import { Dog, Store, Scissors, Home, User, TreePine, Brain, MapPin } from "lucide-react";
-
 import ServiceDetailsCard from "./ServiceDetailsCard";
-import ServiceForms from "./ServiceForms";
 
 const services = [
   { name: "Pet Training", icon: <Dog className="w-8 h-8" /> },
   { name: "Pet Store", icon: <Store className="w-8 h-8" /> },
   { name: "Grooming", icon: <Scissors className="w-8 h-8" /> },
   { name: "Pet Shelter", icon: <Home className="w-8 h-8" /> },
-  { name: "Pet Sitters", icon: <User className="w-8 h-8" /> },
-  { name: "Pet Park", icon: <TreePine className="w-8 h-8" /> },
+  { name: "Pet Sitting", icon: <User className="w-8 h-8" /> },
+  { name: "Pet Walkers", icon: <TreePine className="w-8 h-8" /> },
   { name: "Pet Behaviourists", icon: <Brain className="w-8 h-8" /> },
-  { name: "Tracking", icon: <MapPin className="w-8 h-8" /> },
+  { name: "Pet Resort", icon: <Dog className="w-8 h-8" /> },
 ];
 
 export default function Services() {
@@ -76,8 +74,7 @@ export default function Services() {
                 <h2 className="font-bold text-purple-700">{selectedService}</h2>
                 <button onClick={closeModal} className="text-gray-500">✖</button>
               </div>
-              <ServiceForms service={selectedService} onClose={closeModal} />
-            </div>
+             </div>
           )}
 
         </div>

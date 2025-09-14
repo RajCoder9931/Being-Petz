@@ -61,7 +61,7 @@ const Petprofile: React.FC = () => {
     gender: "Male",
     blood: "DEA 1",
   });
-  // ✅   Login check
+ 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -220,7 +220,6 @@ const Petprofile: React.FC = () => {
                   />
                 ) : null}
               </h2>
-
 
               {/*  Age from DOB */}
               <p className="text-gray-500 text-xs sm:text-sm">
@@ -560,3 +559,5 @@ const Petprofile: React.FC = () => {
 };
 
 export default Petprofile;
+
+

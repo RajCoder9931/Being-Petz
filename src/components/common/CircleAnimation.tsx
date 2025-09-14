@@ -1,4 +1,3 @@
-import React from 'react';
 const CircleAnimation = () => {
   return <div id="container-inside" className="absolute inset-0 overflow-hidden">
       <div id="circle-small" className="absolute rounded-full bg-white/10 w-96 h-96 animate-pulse-slow" style={{

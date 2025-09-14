@@ -1,14 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Menu,
-  Bell,
-  UserCircle,
-  Search,
-  Home,
-  MessageSquare,
-  Users,
-  MoreVertical,
-} from "lucide-react";
+import {Menu,Bell,UserCircle,Search,Home,MessageSquare,Users,MoreVertical} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
 import MessagesPanel from "./MessagesPanel";
@@ -19,7 +10,6 @@ import logo from "../../assets/img/Website & Digital Branding_YouTube Banner Log
 interface HeaderProps {
   onMenuClick: () => void;
 }
-
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<string | null>(null);
@@ -36,10 +26,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   // Close dropdown when clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        panelRef.current &&
-        !panelRef.current.contains(event.target as Node)
-      ) {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         setActivePanel(null);
         setProfileOpen(false);
         setMobileMenuOpen(false);
@@ -52,11 +39,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   }, []);
 
   return (
-    <header className="flex items-center justify-between bg-[#8337B2] text-white px-4 py-3 shadow-md relative">
+    <header className="flex items-center justify-between bg-[#8337B2] text-white px-4 py-3 shadow-md fixed top-0 left-0 w-full z-50">
       {/* LEFT SECTION */}
       <div className="flex items-center gap-3 flex-1">
         {/* Logo */}
-        <img src={logo} alt="Logo" className="h-10 w-55 object-contain" />
+        <img src={logo} alt="Logo" className="h-10 object-contain" />
 
         {/* Sidebar Toggle */}
         <button

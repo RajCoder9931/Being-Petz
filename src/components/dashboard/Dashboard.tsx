@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaPaw } from "react-icons/fa";
+
 // Components
 import Header from "./Header";
 import Sidebar from "./sidebar";
@@ -9,34 +10,20 @@ import Loader from "./Loader";
 import CreatePost from "./CreatePost";
 import PostList from "./Postlist";
 // Images
-import catImg from "../../assets/banner.jpg";
-import img1 from "../../assets/user/03.jpg";
-import img2 from "../../assets/user/01.jpg";
-import img3 from "../../assets/user/07.jpg";
-import img4 from "../../assets/user/p2.jpg"
+import { PawPrint, Calendar, Home, Heart } from "lucide-react";
+import dogImg from "../../assets/img/cat.jpg";
 import img7 from "../../assets/user/06.jpg";
 import img8 from "../../assets/user/07.jpg";
 import img9 from "../../assets/user/08.jpg";
 import adoptPetImg from "../../assets/adopt-img.png";
 import lostFoundImg from "../../assets/lost-found.png";
 
-
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
- 
-  const communities = [
-    { name: "Dog Lovers Club", members: "10k Members", img: img1 },
-    { name: "Cat Kingdom", members: "8.5k Members", img: img2 },
-    { name: "Pet Buddies", members: "6.2k Members", img: img3 },
-    { name: "Pet Kings", members: "4.2k Members", img: img4 },
-  ];
-
-   
-
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col">
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
       <div className="flex flex-1">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -46,14 +33,104 @@ const Dashboard = () => {
             <div className="col-span-2 space-y-6">
               {/* Banner */}
               <div className="rounded-xl overflow-hidden">
-                <img src={catImg} alt="Cat" className="w-full h-full object-cover" />
+                <div className="w-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-between p-4 shadow-md">
+
+                  {/* Left profile image */}
+                  <img
+                    src={dogImg}
+                    alt="Dog"
+                    className="w-20 h-20 rounded-full border-2 border-white"
+                  />
+
+                  {/* Center text + icons */}
+                  <div className="flex flex-col items-center text-white flex-1 mx-4">
+                    <p className="text-1xl font-bold">Welcome Home, Buddy!</p>
+                    <p className="text-lg">for Bet Best Friend</p>
+
+                    {/* icons row */}
+                    <div className="flex gap-6 mt-3">
+                      <PawPrint size={20} />
+                      <Home size={20} />
+                      <Heart size={20} />
+                    </div>
+                  </div>
+
+                  {/* Right side Home icon */}
+                  <div className="bg-white/20 p-4 rounded-full">
+                    <Home size={28} className="text-white" />
+                  </div>
+                </div>
               </div>
+              {/* My Pet Family Section */}
+              <div className="mt-6">
+                <h2 className="text-lg font-semibold mb-4">My Pet Family</h2>
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {/* Pet Card 1 */}
+                  <div className="bg-white rounded-xl shadow-md p-4 w-48 flex-shrink-0 text-center">
+                    <img
+                      src={dogImg}
+                      alt="Buddy"
+                      className="w-20 h-20 rounded-full mx-auto border-2 border-purple-500"
+                    />
+                    <h3 className="mt-3 font-bold">Buddy</h3>
+                    <p className="text-sm text-gray-500">Golden Retriever</p>
+                    <p className="text-xs text-gray-400">3 Years ♂ Male</p>
+                    <div className="flex gap-2 mt-3 justify-center">
+                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                        Edit Profile
+                      </button>
+                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
 
-               {/* Create Post Component */}
-                <CreatePost />
+                  {/* Pet Card 2 */}
+                  <div className="bg-white rounded-xl shadow-md p-4 w-48 flex-shrink-0 text-center">
+                    <img
+                      src={img7}
+                      alt="Max"
+                      className="w-20 h-20 rounded-full mx-auto border-2 border-purple-500"
+                    />
+                    <h3 className="mt-3 font-bold">Max</h3>
+                    <p className="text-sm text-gray-500">Ginger Tabby</p>
+                    <p className="text-xs text-gray-400">3 Years ♂ Male</p>
+                    <div className="flex gap-2 mt-3 justify-center">
+                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                        Edit Profile
+                      </button>
+                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
 
-                {/* Post List */}
-                <PostList />
+                  {/* Pet Card 3 */}
+                  <div className="bg-white rounded-xl shadow-md p-4 w-48 flex-shrink-0 text-center">
+                    <img
+                      src={img8}
+                      alt="Romeo"
+                      className="w-20 h-20 rounded-full mx-auto border-2 border-purple-500"
+                    />
+                    <h3 className="mt-3 font-bold">Romeo</h3>
+                    <p className="text-sm text-gray-500">White Rabbit</p>
+                    <p className="text-xs text-gray-400">3 Years ♂ Male</p>
+                    <div className="flex gap-2 mt-3 justify-center">
+                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                        Edit Profile
+                      </button>
+                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Create Post Component */}
+              <CreatePost />
+
+              {/* Post List */}
+              <PostList />
 
 
               <FriendSuggestions
@@ -67,36 +144,83 @@ const Dashboard = () => {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
-              {/* Communities */}
-              <div className="bg-white rounded-xl shadow overflow-hidden flex flex-col" style={{ height: "350px" }}>
-                <div className="bg-purple-600 px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Communities</h3>
-                  <button className="text-white hover:text-gray-200">⋮</button>
-                </div>
-                <div className="p-4 overflow-y-auto">
-                  <ul className="space-y-4">
-                    {communities.map((com, index) => (
-                      <li key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src={com.img} alt={com.name} className="w-10 h-10 rounded-full object-cover" />
-                          <div>
-                            <p className="font-medium text-gray-800">{com.name}</p>
-                            <p className="text-sm text-gray-500">{com.members}</p>
-                          </div>
-                        </div>
-                        <button className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-1 rounded-lg">
-                          Join
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-4 text-center">
-                    <Link to="/chats" className="text-purple-600 font-medium hover:underline">
-                      See All Communities →
-                    </Link>
-                  </div>
+              {/* Contest Entry */}
+              <div
+                onClick={() => navigate("/contest")}
+                className="relative cursor-pointer rounded-2xl overflow-hidden shadow-lg group"
+              >
+                <img
+                  src="https://picsum.photos/600/300" // contest image
+                  alt="Contest"
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">
+                    Check the Contest
+                  </span>
                 </div>
               </div>
+
+              {/* Sponsored Card 1 */}
+              <div className="relative rounded-2xl shadow-lg overflow-hidden">
+                <img
+                  src="https://picsum.photos/600/300" // yahan apni image lagao
+                  alt="Fuel Their Joy"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-center p-6 text-white">
+                  <h3 className="text-lg font-semibold">Fuel Their Joy!</h3>
+                  <p className="text-sm mt-1">Premium Nutrition for Happy Pets</p>
+                  <button className="mt-3 px-4 py-2 rounded-full bg-white text-green-300 font-medium shadow hover:bg-gray-100">
+                    Discover Now
+                  </button>
+                </div>
+              </div>
+
+              {/* Medical History */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Left Box */}
+                <div className="bg-white rounded-xl shadow-md p-4 flex flex-col justify-between">
+                  <h4 className="font-semibold">Medical History</h4>
+                  <p className="text-xs text-gray-500">View History, Records</p>
+                  <div className="flex justify-between items-center text-xs text-gray-500 mt-2">
+                    <span>45 Comments</span>
+                    <span>Share</span>
+                  </div>
+                </div>
+
+                {/* Right Box */}
+                <div className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center text-center">
+                  <img
+                    src={dogImg}
+                    alt="Vet Clinic"
+                    className="w-12 h-12 rounded-full border border-purple-500 mb-2"
+                  />
+                  <h4 className="font-semibold text-sm">Dr. Whiskers Clinic</h4>
+                  <p className="text-xs text-gray-500">Vet Check-up</p>
+                  <p className="text-xs text-gray-400">2,105 Likes</p>
+                  <button className="mt-2 px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
+                    Book Now
+                  </button>
+                </div>
+              </div>
+
+              {/* Sponsored Card 2 */}
+              <div className="relative rounded-2xl shadow-lg overflow-hidden">
+                <img
+                  src="https://picsum.photos/600/301" // yahan apni image lagao
+                  alt="Travel in Style"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-center p-6 text-white">
+                  <h3 className="text-lg font-semibold">Travel in Style!</h3>
+                  <p className="text-sm mt-1">New Premium Pet Carriers</p>
+                  <button className="mt-3 px-4 py-2 rounded-full bg-white text-purple-600 font-medium shadow hover:bg-gray-100">
+                    Shop Now
+                  </button>
+                </div>
+              </div>
+
 
               {/* Adopt Pet */}
               <div
@@ -143,14 +267,73 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-5">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-800">Featured Pet Events</h2>
+                  <Calendar className="text-purple-600" size={22} />
+                </div>
+
+                {/* Dog Park Meetup */}
+                <div className="flex items-center bg-teal-500 rounded-xl p-4 mb-3 text-white">
+                  <img
+                    src="https://place-puppy.com/80x80"
+                    alt="Dog"
+                    className="w-14 h-14 rounded-full mr-3 object-cover"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-sm">Dog Park Meetup</h3>
+                    <p className="text-xs">Saturday, April 20 • 10:00 AM</p>
+                    <p className="text-xs">Central Bark Park</p>
+                  </div>
+                </div>
+
+                {/* Feline First-Aid Class */}
+                <div className="flex items-center bg-purple-500 rounded-xl p-4 mb-3 text-white">
+                  <img
+                    src="https://placekitten.com/80/80"
+                    alt="Cat"
+                    className="w-14 h-14 rounded-full mr-3 object-cover"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-sm">Feline First-Aid Class</h3>
+                    <p className="text-xs">Sunday, April 21 • 2:00 AM</p>
+                    <p className="text-xs">City Vet Clinic</p>
+                  </div>
+                </div>
+
+                {/* Annual Charity Pet Walk */}
+                <div className="flex items-center bg-orange-400 rounded-xl p-4 mb-3 text-white">
+                  <img
+                    src="https://placebear.com/80/80"
+                    alt="Charity Walk"
+                    className="w-14 h-14 rounded-full mr-3 object-cover"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-sm">Annual Charity Pet Walk</h3>
+                    <p className="text-xs">May 5 • 9:00 AM</p>
+                    <p className="text-xs">Lakeside Trail</p>
+                  </div>
+                </div>
+
+                {/* Button */}
+                <div className="flex justify-center">
+                  <button className="flex items-center gap-2 px-5 py-2 rounded-full bg-purple-600 text-white text-sm font-medium hover:bg-purple-700">
+                    <PawPrint size={16} />
+                    View All Events
+                  </button>
+                </div>
+              </div>
+
+
             </div>
           </div>
         </main>
       </div>
 
-       
+
       <Loader />
- 
+
     </div>
   );
 };

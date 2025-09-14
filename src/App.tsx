@@ -11,17 +11,18 @@ import Settings from "./pages/Settings";
 import PetList from './pages/PetList';
 import PetDetails from './pages/PetDetails';
 import Managerecord from './components/Profile/Managerecords';
-// import PetForm from './components/Profile/AddPetForm';
 import ProfilePage from './components/Profile/Profilepage';
 import FriendRequestPanel from './pages/FriendRequestPage';
 import NotificationsPanel from './pages/NotificationsPage';
 import EditProfile from './components/Profile/Editprofile';
 import PrivacySettingsPage from './pages/PrivacySettingsPage';
 import Foundpet from './pages/Lostfound';
+import Test from './components/Profile/dummyhome';
  export function App() {
   return (
     <Router>
       <Routes>
+        
         {/* Default route -> Login Page */}
         <Route path="/" element={<Navigate to="/login" />} /> 
         <Route path="/home" element={<DashboardPage />} />
@@ -42,10 +43,9 @@ import Foundpet from './pages/Lostfound';
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
         <Route path="/report-found-pet" element={<Foundpet />} />
-
+        <Route path="/test" element={<Test />} />
       </Routes>
       <Footer />
-
     </Router>
   );
 }

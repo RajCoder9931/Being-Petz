@@ -1,67 +1,54 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import PostCard from "./Postcard";
-import img1 from "../../assets/user/03.jpg";
-import img2 from "../../assets/user/01.jpg";
-import img3 from "../../assets/user/07.jpg";
-import parrotImg from "../../assets/user/p4.jpg";
-import whiteCatImg from "../../assets/user/p3.jpg";
-import dogImg from "../../assets/user/p2.jpg";
 
-const PostList = () => {
-  const posts = [
-    {
-      profileImg: img1,
-      userName: "Bni Cyst",
-      time: "1 hour ago",
-      text: "Lorem ipsum dolor sit amet...",
-      image: parrotImg,
-      likes: 140,
-      comments: 20,
-      shares: 99,
-      initialComments: [],
-    },
-    {
-      profileImg: img1,
-      userName: "Bni Cyst",
-      time: "3 days ago",
-      text: "",
-      image: whiteCatImg,
-      likes: 140,
-      comments: 20,
-      shares: 99,
-      initialComments: [],
-    },
-    {
-      profileImg: img2,
-      userName: "Monty Carlo",
-      time: "5 days ago",
-      text: "Lorem ipsum dolor sit amet...",
-      image: dogImg,
-      likes: 100,
-      comments: 15,
-      shares: 80,
-      initialComments: [],
-    },
-    {
-      profileImg: img3,
-      userName: "Paige Turner",
-      time: "1 day ago",
-      text: "Lorem ipsum dolor sit amet...",
-      video: "https://www.youtube.com/embed/tgbNymZ7vqY",
-      likes: 140,
-      comments: 20,
-      shares: 99,
-      initialComments: [],
-    },
-  ];
+interface Parent {
+  id: number;
+  first_name: string;
+  last_name: string;
+  avatar?: string;
+}
+
+interface Post {
+  id: number;
+  parent_id: number;
+  content: string | null;
+  featured_image: string | null;
+  featured_video: string | null;
+  created_at_human: string;
+  likes_count: number;
+  shares_count: number;
+  comments_count: number;
+  parent: Parent;
+}
+
+const PostList: React.FC = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get("https://argosmob.com/being-petz/public/api/v1/post/all")
+      .then((res) => {
+        setPosts(res.data.data.data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching posts:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="space-y-6">
-      {posts.map((post, index) => (
-        <PostCard key={index} {...post} />
-      ))}
-    </div>
+    <div className="space-y-4 max-w-4xl mx-auto mt-4">
+  {posts.map((post) => (
+    <PostCard key={post.id} post={post} />
+  ))}
+</div>
+
   );
 };
 
 export default PostList;
- 

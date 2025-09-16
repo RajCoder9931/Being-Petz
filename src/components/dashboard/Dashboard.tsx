@@ -79,9 +79,7 @@ const Dashboard = () => {
                       <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
                         Edit Profile
                       </button>
-                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
-                        Book Now
-                      </button>
+                      
                     </div>
                   </div>
 
@@ -99,9 +97,7 @@ const Dashboard = () => {
                       <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
                         Edit Profile
                       </button>
-                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
-                        Book Now
-                      </button>
+                      
                     </div>
                   </div>
 
@@ -119,9 +115,7 @@ const Dashboard = () => {
                       <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
                         Edit Profile
                       </button>
-                      <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
-                        Book Now
-                      </button>
+                      
                     </div>
                   </div>
                 </div>

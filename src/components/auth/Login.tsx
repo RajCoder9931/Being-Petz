@@ -299,6 +299,7 @@ function Login() {
 
   return (
     <div className="flex min-h-screen w-full">
+    
       {/* Left side */}
       <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-purple-600 to-purple-400 flex-col items-center justify-center p-10 text-white relative overflow-hidden">
         <CircleAnimation />

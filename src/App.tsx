@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import Footer from './components/dashboard/Footer';
 import Profile from './components/Profile/Petprofile';
+import Blogs from './components/dashboard/Blogs';
 import PetParent from './components/Profile/PetParent';
 import Chats from './components/community/CommunityApp';
 import Services from './components/services/services';
@@ -17,7 +18,7 @@ import NotificationsPanel from './pages/NotificationsPage';
 import EditProfile from './components/Profile/Editprofile';
 import PrivacySettingsPage from './pages/PrivacySettingsPage';
 import Foundpet from './pages/Lostfound';
-import Test from './components/Profile/dummyhome';
+import Test from './components/dashboard/dummyhome';
  export function App() {
   return (
     <Router>
@@ -31,7 +32,7 @@ import Test from './components/Profile/dummyhome';
         <Route path="/pet-profile" element={<Profile />} />
         <Route path="/managerecord" element={<Managerecord/>} />
         <Route path="pet-parents" element={<PetParent />} />
-        {/* <Route path="/petform" element={<PetForm />} />   */}
+        <Route path="/blog" element={<Blogs />} />  
         <Route path="chats" element={<Chats />} />
         <Route path="services" element={<Services />} />
         <Route path="settings" element={<Settings />} />

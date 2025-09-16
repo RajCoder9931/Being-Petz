@@ -5,7 +5,6 @@ import {
   Users,
   MessageSquare,
   Wrench,
-  Settings,
   Newspaper,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -21,7 +20,6 @@ const menuItems = [
   { name: "Pet Parents", icon: Users, path: "/pet-parents" },
   { name: "Chats", icon: MessageSquare, path: "/chats" },
   { name: "All Services", icon: Wrench, path: "/services" },
-  { name: "Settings", icon: Settings, path: "/settings" },
   { name: "Blog", icon: Newspaper, path: "/blog" },
   { name: "Contest", icon: Newspaper, path: "/contest" },
   { name: "Events", icon: Newspaper, path: "/events" },

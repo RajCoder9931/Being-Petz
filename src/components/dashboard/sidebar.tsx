@@ -6,6 +6,7 @@ import {
   MessageSquare,
   Wrench,
   Newspaper,
+  Calendar,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -21,8 +22,8 @@ const menuItems = [
   { name: "Chats", icon: MessageSquare, path: "/chats" },
   { name: "All Services", icon: Wrench, path: "/services" },
   { name: "Blog", icon: Newspaper, path: "/blog" },
-  { name: "Contest", icon: Newspaper, path: "/contest" },
-  { name: "Events", icon: Newspaper, path: "/events" },
+  // { name: "Contest", icon: Newspaper, path: "/contest" },
+  { name: "Events", icon: Calendar, path: "/events" },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {

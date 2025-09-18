@@ -10,13 +10,46 @@ import Loader from "./Loader";
 import CreatePost from "./CreatePost";
 import PostList from "./Postlist";
 // Images
-import { PawPrint, Calendar, Home, Heart } from "lucide-react";
+import { PawPrint, CalendarIcon, Home, Heart } from "lucide-react";
 import dogImg from "../../assets/img/cat.jpg";
 import img7 from "../../assets/user/06.jpg";
 import img8 from "../../assets/user/07.jpg";
 import img9 from "../../assets/user/08.jpg";
 import adoptPetImg from "../../assets/adopt-img.png";
 import lostFoundImg from "../../assets/lost-found.png";
+
+type EventType = {
+  id: number;
+  title: string;
+  date: Date;
+  time: string;
+  location: string;
+  image: string;
+  bgColor: string;  
+};
+ 
+const events: EventType[] = [
+  {
+    id: 1,
+    title: "Pet Adoption Event",
+    date: new Date(2025, 9, 4),
+    time: "Saturday, Oct 4 • 11:00 AM - 1:00 PM",
+    location: "Ellington Agway, 74 West Rd, Ellington, CT",
+    image:
+      "https://people.com/thmb/Rm8iYbylv_7ZqLUpJI53Z75XAHg=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(749x0:751x2)/hallmark-adoption-event-07-4e1d6a10f3734cbca7fdb905b8945638.jpg",
+    bgColor: "bg-pink-500",
+  },
+  {
+    id: 2,
+    title: "Community Fundraiser",
+    date: new Date(2025, 9, 10),
+    time: "Friday, Oct 10 • 2:00 PM - 5:00 PM",
+    location: "Town Hall, Ellington CT",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYtlzEbboFDQtJpDadNq4jodFgca_5MmVhRw&s",
+    bgColor: "bg-purple-500",
+  },
+];
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -140,17 +173,17 @@ const Dashboard = () => {
             <div className="space-y-6">
               {/* Contest Entry */}
               <div
-                onClick={() => navigate("/contest")}
+                onClick={() => navigate("/events")}
                 className="relative cursor-pointer rounded-2xl overflow-hidden shadow-lg group"
               >
                 <img
-                  src="https://picsum.photos/600/300" // contest image
+                  src="https://www.stonnington.vic.gov.au/files/assets/public/community/arts-and-culture/festival-and-events/pets-in-the-park/pets-in-the-park-2021-a.jpg" 
                   alt="Contest"
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                   <span className="text-white font-bold text-xl">
-                    Check the Contest
+                    Check the Events
                   </span>
                 </div>
               </div>
@@ -158,14 +191,17 @@ const Dashboard = () => {
               {/* Sponsored Card 1 */}
               <div className="relative rounded-2xl shadow-lg overflow-hidden">
                 <img
-                  src="https://picsum.photos/600/300" // yahan apni image lagao
+                  src="https://picsum.photos/600/300"  
                   alt="Fuel Their Joy"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover "
                 />
+                <span className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded-full">
+                  Sponsored !
+                </span>
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-center p-6 text-white">
                   <h3 className="text-lg font-semibold">Fuel Their Joy!</h3>
                   <p className="text-sm mt-1">Premium Nutrition for Happy Pets</p>
-                  <button className="mt-3 px-4 py-2 rounded-full bg-white text-green-300 font-medium shadow hover:bg-gray-100">
+                  <button className="mt-3 px-4 py-2 rounded-full bg-transparent border border-green-300 text-green-300 font-medium shadow hover:bg-gray-100">
                     Discover Now
                   </button>
                 </div>
@@ -202,14 +238,17 @@ const Dashboard = () => {
               {/* Sponsored Card 2 */}
               <div className="relative rounded-2xl shadow-lg overflow-hidden">
                 <img
-                  src="https://picsum.photos/600/301" // yahan apni image lagao
+                  src="https://picsum.photos/600/301"  
                   alt="Travel in Style"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 object-cover "
                 />
+                <span className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded-full">
+                  Sponsored !
+                </span>
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-center p-6 text-white">
                   <h3 className="text-lg font-semibold">Travel in Style!</h3>
                   <p className="text-sm mt-1">New Premium Pet Carriers</p>
-                  <button className="mt-3 px-4 py-2 rounded-full bg-white text-purple-600 font-medium shadow hover:bg-gray-100">
+                  <button className="mt-3 px-4 py-2 rounded-full bg-transparent border border-purple-600 text-purple-600 font-medium shadow hover:bg-gray-100">
                     Shop Now
                   </button>
                 </div>
@@ -262,62 +301,42 @@ const Dashboard = () => {
               </div>
 
               <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-5">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-800">Featured Pet Events</h2>
-                  <Calendar className="text-purple-600" size={22} />
-                </div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-gray-800">Featured Pet Events</h2>
+        <CalendarIcon className="text-purple-600" size={22} />
+      </div>
 
-                {/* Dog Park Meetup */}
-                <div className="flex items-center bg-teal-500 rounded-xl p-4 mb-3 text-white">
-                  <img
-                    src="https://place-puppy.com/80x80"
-                    alt="Dog"
-                    className="w-14 h-14 rounded-full mr-3 object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-sm">Dog Park Meetup</h3>
-                    <p className="text-xs">Saturday, April 20 • 10:00 AM</p>
-                    <p className="text-xs">Central Bark Park</p>
-                  </div>
-                </div>
+      {/* Event List */}
+      {events.map((event) => (
+        <div
+          key={event.id}
+          className={`flex items-center ${event.bgColor} rounded-xl p-4 mb-3 text-white`}
+        >
+          <img
+            src={event.image}
+            alt={event.title}
+            className="w-14 h-14 rounded-full mr-3 object-cover"
+          />
+          <div>
+            <h3 className="font-semibold text-sm">{event.title}</h3>
+            <p className="text-xs">{event.time}</p>
+            <p className="text-xs">{event.location}</p>
+          </div>
+        </div>
+      ))}
 
-                {/* Feline First-Aid Class */}
-                <div className="flex items-center bg-purple-500 rounded-xl p-4 mb-3 text-white">
-                  <img
-                    src="https://placekitten.com/80/80"
-                    alt="Cat"
-                    className="w-14 h-14 rounded-full mr-3 object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-sm">Feline First-Aid Class</h3>
-                    <p className="text-xs">Sunday, April 21 • 2:00 AM</p>
-                    <p className="text-xs">City Vet Clinic</p>
-                  </div>
-                </div>
-
-                {/* Annual Charity Pet Walk */}
-                <div className="flex items-center bg-orange-400 rounded-xl p-4 mb-3 text-white">
-                  <img
-                    src="https://placebear.com/80/80"
-                    alt="Charity Walk"
-                    className="w-14 h-14 rounded-full mr-3 object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-sm">Annual Charity Pet Walk</h3>
-                    <p className="text-xs">May 5 • 9:00 AM</p>
-                    <p className="text-xs">Lakeside Trail</p>
-                  </div>
-                </div>
-
-                {/* Button */}
-                <div className="flex justify-center">
-                  <button className="flex items-center gap-2 px-5 py-2 rounded-full bg-purple-600 text-white text-sm font-medium hover:bg-purple-700">
-                    <PawPrint size={16} />
-                    View All Events
-                  </button>
-                </div>
-              </div>
+      {/* Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => navigate("/events")}
+          className="flex items-center gap-2 px-5 py-2 rounded-full bg-purple-600 text-white text-sm font-medium hover:bg-purple-700"
+        >
+          <PawPrint size={16} />
+          View All Events
+        </button>
+      </div>
+    </div>
 
 
             </div>

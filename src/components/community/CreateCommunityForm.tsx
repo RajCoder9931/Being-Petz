@@ -1,8 +1,10 @@
- import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+
 interface Props {
   onClose: () => void;
   onCreated: () => void;
 }
+
 export default function CreateCommunityForm({ onClose, onCreated }: Props) {
   const [formData, setFormData] = useState({
     name: "",
@@ -23,7 +25,7 @@ export default function CreateCommunityForm({ onClose, onCreated }: Props) {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      setFormData((prev) => ({ ...prev, created_by: user.id })); // auto set created_by
+      setFormData((prev) => ({ ...prev, created_by: String(user.id) })); // ensure string
     }
   }, []);
 
@@ -62,11 +64,20 @@ export default function CreateCommunityForm({ onClose, onCreated }: Props) {
     e.preventDefault();
 
     const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        data.append(key, String(value)); // always string
+      }
+    });
 
-    //  profile  and cover image
-    if (profileImage) data.append("profile", profileImage);
+    // profile and cover image
+    if (profileImage) data.append("profile_image", profileImage);
     if (coverImage) data.append("cover_image", coverImage);
+
+    // Debug: check what is being sent
+    for (const [key, value] of data.entries()) {
+      console.log(key, value);
+    }
 
     try {
       const res = await fetch(
@@ -74,6 +85,9 @@ export default function CreateCommunityForm({ onClose, onCreated }: Props) {
         {
           method: "POST",
           body: data,
+          headers: {
+            Accept: "application/json",
+          },
         }
       );
 
@@ -162,7 +176,7 @@ export default function CreateCommunityForm({ onClose, onCreated }: Props) {
             required
           />
 
-          {/* Hidden Created By (auto-filled from login user) */}
+          {/* Hidden Created By */}
           <input type="hidden" name="created_by" value={formData.created_by} />
 
           {/* Upload Profile Image */}

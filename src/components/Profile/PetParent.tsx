@@ -8,10 +8,9 @@ import parrotImg from "../../assets/user/p4.jpg";
 import Max from "../../assets/img/postdog.png";
 import Buddy from "../../assets/img/adopt2.avif";
 import cat from "../../assets/img/cat.jpg";
-import PostCard from "../dashboard/Postcard";
 import { useNavigate } from "react-router-dom";
 import Pets from "./MyPets";
-
+import PostList from "../dashboard/Postlist";
 
 interface Friend {
   id: number;
@@ -238,17 +237,7 @@ function PetParentProfile() {
               <Pets />
 
               {/* Recent Posts */}
-              <PostCard
-                profileImg={img1}
-                userName="Bni Cyst"
-                time="1 hour ago"
-                text="Lorem ipsum dolor sit amet..."
-                image={parrotImg}
-                likes={140}
-                comments={20}
-                shares={99}
-                initialComments={[]}
-              />
+              <PostList />
             </div>
 
             {/* RIGHT SIDE */}

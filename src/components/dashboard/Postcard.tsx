@@ -35,6 +35,7 @@ interface Post {
   parent: Parent;
 }
 
+ 
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [likeCount, setLikeCount] = useState(post.likes_count || 0);
   const [isLiked, setIsLiked] = useState(false);
@@ -189,7 +190,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       {/* Comments */}
       <div className="mt-3 space-y-3">
         {commentList.map((c) => {
-          // ✅ Default values
+         // Values of comment
           let displayName = "Anonymous";
           let avatarUrl = "https://via.placeholder.com/32";
 
@@ -264,3 +265,5 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 };
 
 export default PostCard;
+
+ 

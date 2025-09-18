@@ -1,102 +1,97 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaPaw, FaPlus } from "react-icons/fa";
-import axios from "axios";
-// import puppyImage from "../../assets/img/puppy.jpg";
-
-// ✅ Sidebar & Header import
+import { FaPaw } from "react-icons/fa";
 import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
 
 type Blog = {
   id: number;
   title: string;
+  short_description: string;
+  content: string;
   image: string;
-  text: string;
 };
 
 const BlogPage: React.FC = () => {
-  const defaultBlogs: Blog[] = [
-    
-  ]
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+      // dummy imgaes 
+  const petDummyImages = [
+    "https://placedog.net/600/400?id=1",
+    "https://placedog.net/600/400?id=2",
+    "https://placekitten.com/600/400",
+    "https://placedog.net/600/400?id=3",
+    "https://placekitten.com/601/401",
+  ];
+
+  // Random pet image
+  const getRandomPetImage = () =>
+    petDummyImages[Math.floor(Math.random() * petDummyImages.length)];
+
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [newBlog, setNewBlog] = useState({
-    title: "",
-    text: "",
-    image: null as File | null,
-  });
-  const [loading, setLoading] = useState(false);
-
-  // Load from localStorage
-  useEffect(() => {
-    const savedBlogs = localStorage.getItem("blogs");
-    if (savedBlogs) {
-      setBlogs(JSON.parse(savedBlogs));
-    } else {
-      setBlogs(defaultBlogs);
-    }
-  }, []);
-
-  // Save to localStorage whenever blogs change
-  useEffect(() => {
-    localStorage.setItem("blogs", JSON.stringify(blogs));
-  }, [blogs]);
 
   const toggleReadMore = (id: number) => {
     setExpanded(expanded === id ? null : id);
   };
 
-  // ✅ Handle Blog Submit with API
-  const handleCreateBlog = async () => {
-    if (!newBlog.title || !newBlog.text || !newBlog.image) return;
+  // Fetch all blogs with pagination
+  const fetchAllBlogs = async () => {
+    let allBlogs: Blog[] = [];
+    let page = 1;
+    let lastPage = 1;
 
     try {
-      setLoading(true);
-
-      const user_id = localStorage.getItem("user_id"); // ✅ user_id from login
-      const author_name = localStorage.getItem("username") || "Guest User";
-
-      const formData = new FormData();
-      formData.append("title", newBlog.title);
-      formData.append("content", newBlog.text);
-      formData.append("featured_image", newBlog.image);
-      formData.append("author_name", author_name);
-      formData.append("user_id", user_id || "");
-
-      const response = await axios.post(
-        "https://argosmob.com/being-petz/public/api/v1/post/create",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      do {
+        const res = await fetch(
+          `https://argosmob.com/being-petz/public/api/v1/blogs?page=${page}`
+        );
+        if (!res.ok) {
+          throw new Error(`Error fetching page ${page}: ${res.status}`);
         }
-      );
+        const data = await res.json();
 
-      console.log("✅ Blog Created:", response.data);
+        if (data.status && data.blogs?.data) {
+          const pageBlogs = data.blogs.data.map((blog: any) => ({
+            id: blog.id,
+            title: blog.title,
+            short_description: blog.short_description,
+            content: blog.content,
+            image: blog.image
+              ? `https://argosmob.com/being-petz/public/${blog.image}`
+              : getRandomPetImage(),  // random images
+          }));
 
-      const blog: Blog = {
-        id: Date.now(),
-        title: newBlog.title,
-        image: URL.createObjectURL(newBlog.image), 
-        text: newBlog.text,
-      };
+          allBlogs = allBlogs.concat(pageBlogs);
 
-      setBlogs([blog, ...blogs]);
-      setNewBlog({ title: "", text: "", image: null });
-      setIsFormOpen(false);
-    } catch (error) {
-      console.error(" Error creating blog:", error);
+          if (data.blogs.last_page) {
+            lastPage = data.blogs.last_page;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+
+        page += 1;
+      } while (page <= lastPage);
+
+      setBlogs(allBlogs);
+    } catch (err: any) {
+      console.error("Error fetching blogs:", err);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAllBlogs();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-purple-50">
@@ -109,45 +104,57 @@ const BlogPage: React.FC = () => {
 
         {/* Blogs Section */}
         <div className="p-6">
-          {/* Top Title & Button */}
-          <div className="bg-white shadow-md py-4 flex justify-between px-6 items-center rounded-xl mb-6 border-l-4 border-purple-500">
-            <div className="flex justify-center items-center space-x-3 w-full">
-              <FaPaw className="text-purple-600 text-2xl" />
-              <h1 className="text-2xl font-bold text-purple-700">Pets Blogs</h1>
+          {/* Top Banner */}
+          <div
+            className="relative w-full h-40 sm:h-44 md:h-48 flex items-center justify-center rounded-xl overflow-hidden mb-6"
+            style={{
+              backgroundImage:
+                "url('https://i.pinimg.com/736x/19/55/55/195555f1a337b0ff854a97ec3abf6545.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="absolute inset-0 bg-black/40"></div>
+            <div className="relative flex items-center space-x-3">
+              <FaPaw className="text-white text-2xl mr-2 drop-shadow-md" />
+              <h1 className="text-2xl font-bold text-white drop-shadow-lg">
+                Pets Blogs
+              </h1>
             </div>
-            <button
-              className="bg-purple-600 text-white px-4 py-2 rounded-xl shadow-md hover:bg-purple-700 flex items-center space-x-2"
-              onClick={() => setIsFormOpen(true)}
-            >
-              <FaPlus /> <span>Create Blog</span>
-            </button>
           </div>
 
-          {/* Blog Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blogs.map((blog) => (
-              <motion.div
-                key={blog.id}
-                className="bg-white shadow-lg rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition border border-purple-100"
-                whileHover={{ y: -5 }}
-                onClick={() => setSelectedBlog(blog)}
-              >
-                <img
-                  src={blog.image}
-                  alt={blog.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h2 className="text-lg font-semibold text-purple-700">
-                    {blog.title}
-                  </h2>
-                  <p className="text-gray-600 text-sm mt-2">
-                    {expanded === blog.id
-                      ? blog.text
-                      : blog.text.slice(0, 80) +
-                        (blog.text.length > 80 ? "..." : "")}
-                  </p>
-                  {blog.text.length > 80 && (
+          {loading ? (
+            <p className="text-center text-gray-600">Loading blogs...</p>
+          ) : error ? (
+            <p className="text-center text-red-600">Error: {error}</p>
+          ) : blogs.length === 0 ? (
+            <p className="text-center text-gray-600">No blogs found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.map((blog) => (
+                <motion.div
+                  key={blog.id}
+                  className="bg-white shadow-lg rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition border border-purple-100"
+                  whileHover={{ y: -5 }}
+                  onClick={() => setSelectedBlog(blog)}
+                >
+                  <img
+                    src={blog.image}
+                    alt={blog.title}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getRandomPetImage();
+                    }}
+                  />
+                  <div className="p-4">
+                    <h2 className="text-lg font-semibold text-purple-700">
+                      {blog.title}
+                    </h2>
+                    <p className="text-gray-600 text-sm mt-2">
+                      {expanded === blog.id
+                        ? blog.content
+                        : blog.short_description}
+                    </p>
                     <button
                       className="text-purple-600 mt-2 text-sm font-medium"
                       onClick={(e) => {
@@ -157,11 +164,11 @@ const BlogPage: React.FC = () => {
                     >
                       {expanded === blog.id ? "Read Less" : "Read More"}
                     </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -183,70 +190,14 @@ const BlogPage: React.FC = () => {
               src={selectedBlog.image}
               alt={selectedBlog.title}
               className="w-full h-56 object-cover rounded-lg"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getRandomPetImage();
+              }}
             />
             <h2 className="text-xl font-bold mt-4 text-purple-700">
               {selectedBlog.title}
             </h2>
-            <p className="text-gray-700 mt-2">{selectedBlog.text}</p>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Create Blog Modal */}
-      {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md relative border-t-4 border-purple-600"
-          >
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-black"
-              onClick={() => setIsFormOpen(false)}
-            >
-              ✕
-            </button>
-            <h2 className="text-xl font-bold mb-4 text-purple-700">
-              Create New Blog
-            </h2>
-
-            <input
-              type="text"
-              placeholder="Blog Title"
-              className="w-full border p-2 rounded mb-3"
-              value={newBlog.title}
-              onChange={(e) =>
-                setNewBlog({ ...newBlog, title: e.target.value })
-              }
-            />
-
-            <textarea
-              placeholder="Write your blog content..."
-              rows={4}
-              className="w-full border p-2 rounded mb-3"
-              value={newBlog.text}
-              onChange={(e) => setNewBlog({ ...newBlog, text: e.target.value })}
-            />
-
-            <input
-              type="file"
-              accept="image/*"
-              className="w-full border p-2 rounded mb-3"
-              onChange={(e) =>
-                setNewBlog({
-                  ...newBlog,
-                  image: e.target.files ? e.target.files[0] : null,
-                })
-              }
-            />
-
-            <button
-              onClick={handleCreateBlog}
-              disabled={loading}
-              className="bg-purple-600 text-white px-4 py-2 rounded-xl shadow-md hover:bg-purple-700 w-full"
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
+            <p className="text-gray-700 mt-2">{selectedBlog.content}</p>
           </motion.div>
         </div>
       )}

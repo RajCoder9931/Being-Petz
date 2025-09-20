@@ -15,7 +15,7 @@ const HomePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-white">
+    <div className="flex flex-col min-h-screen w-full bg-white pt-12">
       {/* Header */}
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 

@@ -19,7 +19,7 @@ import NotificationsPanel from './pages/NotificationsPage';
 import EditProfile from './components/Profile/Editprofile';
 import PrivacySettingsPage from './pages/PrivacySettingsPage';
 import Foundpet from './pages/Lostfound';
-  export function App() {
+   export function App() {
   return (
     <Router>
       <Routes>
@@ -45,7 +45,7 @@ import Foundpet from './pages/Lostfound';
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
         <Route path="/report-found-pet" element={<Foundpet />} />
-       </Routes>
+        </Routes>
       <Footer />
     </Router>
   );

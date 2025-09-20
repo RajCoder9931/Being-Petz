@@ -16,7 +16,7 @@ const NotificationsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-12">
       {/* Header */}
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin, Info, Users, Calendar } from "lucide-react";
+import { MapPin, Info, Users, Calendar, Edit } from "lucide-react";
 import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
 import img1 from "../../assets/user/03.jpg";
@@ -113,7 +113,7 @@ function PetParentProfile() {
               friends: `${person.friends_count || 0} friends`,
               img: person.profile
                 ? `https://argosmob.com/being-petz/public/${person.profile}`
-                : null,  
+                : null,
               gender: person.gender || "",
             };
           });
@@ -132,7 +132,7 @@ function PetParentProfile() {
   }, [parentId]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 pt-12">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuClick={toggleSidebar} />
@@ -188,18 +188,17 @@ function PetParentProfile() {
                   </div>
                 </div>
 
-                <div className="flex space-x-3 mt-6">
+                <div className="flex items-center space-x-2 mt-6">
                   <button
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition flex items-center"
                     type="button"
                     onClick={() => navigate("/edit-profile")}
                   >
                     Edit Profile
-                  </button>
-                  <button className="border border-purple-600 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 transition">
-                    Share
+                    <Edit className="ml-2" />
                   </button>
                 </div>
+
               </div>
 
               {/* About Section */}
@@ -248,7 +247,7 @@ function PetParentProfile() {
                   <h2 className="text-xl font-bold text-purple-700 flex items-center gap-2">
                     Pet Friends
                   </h2>
-                  <button className="text-purple-600 text-sm"onClick={() => navigate('/friend-requests')}>See All</button>
+                  <button className="text-purple-600 text-sm" onClick={() => navigate('/friend-requests')}>See All</button>
                 </div>
 
                 <div className="mt-4 space-y-4">
@@ -344,6 +343,6 @@ function PetParentProfile() {
   );
 }
 
-export default PetParentProfile;
+export default PetParentProfile;  
 
 

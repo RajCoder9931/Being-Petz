@@ -94,7 +94,7 @@ const BlogPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-purple-50">
+    <div className="flex min-h-screen bg-purple-50 pt-12">
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 

@@ -302,7 +302,7 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
                             disabled={!selectedOption}
                             onClick={() => selectedOption && handleVote(msg.poll.id, selectedOption)}
                             className="mt-2 w-full bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-600 disabled:opacity-50 transition"
-                          >
+                        >
                             Submit Vote
                           </button>
                         </form>

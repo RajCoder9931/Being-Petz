@@ -199,5 +199,4 @@ const AddPetForm: React.FC<AddPetFormProps> = ({ open, setOpen, userId, onPetAdd
     </div>
   );
 };
-
 export default AddPetForm;

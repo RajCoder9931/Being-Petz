@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { MapPin, Info, Users, Calendar, Edit } from "lucide-react";
+import { MapPin, Info, Users, CalendarIcon, Edit } from "lucide-react";
+import axios from "axios";
 import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
 import img1 from "../../assets/user/03.jpg";
@@ -19,7 +20,15 @@ interface Friend {
   img: string | null;
   gender: string;
 }
-
+type EventType = {
+  id: number;
+  title: string;
+  date: Date;
+  time: string;
+  location: string;
+  image: string;
+  bgColor: string;  
+};
 function PetParentProfile() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -50,7 +59,7 @@ function PetParentProfile() {
   }, []);
 
   const dummyImages = [
-    profile,  // deult image
+    profile,  
     img1,
     cat,
     parrotImg,
@@ -88,6 +97,27 @@ function PetParentProfile() {
       }
     }
   }, []);
+
+  const [events, setEvents] = useState<EventType[]>([]);
+ 
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        "https://argosmob.com/being-petz/public/api/v1/events"
+      );
+      setEvents(response.data.data.data || []);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      alert("Failed to fetch events");
+    }
+    setLoading(false);
+  };
+
   // fetch the frineds
   useEffect(() => {
     if (!parentId) return;
@@ -277,28 +307,42 @@ function PetParentProfile() {
               </div>
 
               {/* Events */}
-              <div className="bg-white rounded-2xl shadow p-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold text-purple-700 flex items-center gap-2">
-                    <Calendar /> Upcoming Events
-                  </h2>
-                  <button className="text-purple-600 text-sm">See All</button>
-                </div>
-                <div className="mt-4 space-y-4 text-gray-700">
-                  <div>
-                    <p className="font-semibold">15 JUN</p>
-                    <p>Dog Park Meetup – 10:00 AM</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">22 JUN</p>
-                    <p>Pet First Aid Workshop – 2:00 PM</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">05 JUL</p>
-                    <p>Adoption Fair – 11:00 AM</p>
-                  </div>
-                </div>
+              <div className="mt-6 p-6 bg-white rounded-xl shadow-md">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-gray-800">Featured Pet Events</h2>
+        <CalendarIcon className="text-purple-600" size={22} />
+      </div>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="flex items-center bg-gray-50 rounded-xl shadow p-3"
+            >
+              <img
+                src={
+                  event.image
+                    ? event.image.startsWith("http")
+                      ? event.image
+                      : `https://argosmob.com/being-petz/public/${event.image}`
+                    : "https://via.placeholder.com/100"
+                }
+                alt={event.title}
+                className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+              />
+              <div className="ml-4 flex flex-col justify-center">
+                <h3 className="font-semibold text-sm">{event.title}</h3>
+                <p className="text-xs text-gray-500">{event.location}</p>
+                <p className="text-xs text-gray-400">{event.event_date}</p>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
 
               {/* Groups */}
               <div className="bg-white rounded-2xl shadow p-6">

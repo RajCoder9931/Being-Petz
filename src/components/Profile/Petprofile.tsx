@@ -2,35 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import femaleIcon from "../../assets/img/female.png";
 import maleIcon from "../../assets/img/male.png";
-// import { motion } from "framer-motion";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
-
-// const SlideCard = ({ img, title, subtitle, bgColor }: any) => (
-//   <motion.div
-//     className="flex flex-col sm:flex-row items-center gap-3"
-//     initial={{ x: -100, opacity: 0 }}
-//     whileInView={{ x: 0, opacity: 1 }}
-//     viewport={{ once: true, amount: 0.3 }}
-//     transition={{ duration: 0.6, ease: "easeOut" }}
-//   >
-//     <motion.img
-//       src={img}
-//       alt={title}
-//       className="w-full sm:w-40 h-40 rounded-lg object-cover shadow-md"
-//     />
-//     <motion.div
-//       className="flex-1 w-full p-3 sm:p-4 rounded-lg shadow-md"
-//       style={{ backgroundColor: bgColor }}
-//     >
-//       <h3 className="font-semibold text-base sm:text-lg">{title}</h3>
-//       <p className="text-xs sm:text-sm">{subtitle}</p>
-//     </motion.div>
-//   </motion.div>
-// );
-
+ 
 const Petprofile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"records" | "reminder" | "profile">("records");
   const navigate = useNavigate();
@@ -94,12 +70,12 @@ const Petprofile: React.FC = () => {
   };
   // vaccination details
   const [vaccineRecords, setVaccineRecords] = useState<any[]>([]);
-const [dewormingRecords, setDewormingRecords] = useState<any[]>([]);
-const [groomingRecords, setGroomingRecords] = useState<any[]>([]);
-const [mealRecords, setMealRecords] = useState<any[]>([]);
-const [weightRecords, setWeightRecords] = useState<any[]>([]);
+  const [dewormingRecords, setDewormingRecords] = useState<any[]>([]);
+  const [groomingRecords, setGroomingRecords] = useState<any[]>([]);
+  const [mealRecords, setMealRecords] = useState<any[]>([]);
+  const [weightRecords, setWeightRecords] = useState<any[]>([]);
 
- 
+
   // // Fetch vaccine records when selectedPet changes
 
   useEffect(() => {
@@ -111,7 +87,7 @@ const [weightRecords, setWeightRecords] = useState<any[]>([]);
         })
         .then((res) => setVaccineRecords(res.data?.data || []))
         .catch(() => setVaccineRecords([]));
-  
+
       // Deworming
       axios
         .post("https://argosmob.com/being-petz/public/api/v1/deworming/all-records", {
@@ -119,7 +95,7 @@ const [weightRecords, setWeightRecords] = useState<any[]>([]);
         })
         .then((res) => setDewormingRecords(res.data?.data || []))
         .catch(() => setDewormingRecords([]));
-  
+
       // Grooming
       axios
         .post("https://argosmob.com/being-petz/public/api/v1/grooming/all-records", {
@@ -127,7 +103,7 @@ const [weightRecords, setWeightRecords] = useState<any[]>([]);
         })
         .then((res) => setGroomingRecords(res.data?.data || []))
         .catch(() => setGroomingRecords([]));
-  
+
       // Meal
       axios
         .post("https://argosmob.com/being-petz/public/api/v1/meal/all-records", {
@@ -135,7 +111,7 @@ const [weightRecords, setWeightRecords] = useState<any[]>([]);
         })
         .then((res) => setMealRecords(res.data?.data || []))
         .catch(() => setMealRecords([]));
-  
+
       // Weight
       axios
         .post("https://argosmob.com/being-petz/public/api/v1/weight/all-records", {
@@ -145,24 +121,24 @@ const [weightRecords, setWeightRecords] = useState<any[]>([]);
         .catch(() => setWeightRecords([]));
     }
   }, [selectedPet]);
-  
+
   const useCountdown = (targetDate: string, targetTime: string) => {
     const [timeLeft, setTimeLeft] = React.useState("");
-  
+
     React.useEffect(() => {
       if (!targetDate) return;
-  
+
       const interval = setInterval(() => {
         const target = new Date(`${targetDate}T${targetTime || "00:00:00"}`);
         const now = new Date().getTime();
         const distance = target.getTime() - now;
-  
+
         if (distance <= 0) {
           setTimeLeft("Expired");
           clearInterval(interval);
           return;
         }
-  
+
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
           (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
@@ -171,52 +147,52 @@ const [weightRecords, setWeightRecords] = useState<any[]>([]);
           (distance % (1000 * 60 * 60)) / (1000 * 60)
         );
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-  
+
         setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
       }, 1000);
-  
+
       return () => clearInterval(interval);
     }, [targetDate, targetTime]);
-  
-    return timeLeft; 
+
+    return timeLeft;
   };
-  const [selectedPetId, setSelectedPetId] = useState<number | null>(36);  
-const [vaccination, setVaccination] = useState<any>(null);
-const [deworming, setDeworming] = useState<any>(null);
-const [grooming, setGrooming] = useState<any>(null);
+  const [selectedPetId, setSelectedPetId] = useState<number | null>(36);
+  const [vaccination, setVaccination] = useState<any>(null);
+  const [deworming, setDeworming] = useState<any>(null);
+  const [grooming, setGrooming] = useState<any>(null);
 
-useEffect(() => {
-  if (!selectedPetId) return;
+  useEffect(() => {
+    if (!selectedPetId) return;
 
-  const fetchData = async () => {
-    try {
-      // Vaccination
-      const vacRes = await fetch("https://argosmob.com/being-petz/public/api/v1/vaccine/all-records");
-      const vacData = await vacRes.json();
-      const petVac = vacData.data.find((item: any) => item.pet_id === selectedPetId);
-      setVaccination(petVac || null);
+    const fetchData = async () => {
+      try {
+        // Vaccination
+        const vacRes = await fetch("https://argosmob.com/being-petz/public/api/v1/vaccine/all-records");
+        const vacData = await vacRes.json();
+        const petVac = vacData.data.find((item: any) => item.pet_id === selectedPetId);
+        setVaccination(petVac || null);
 
-      // Deworming
-      const dewRes = await fetch("https://argosmob.com/being-petz/public/api/v1/deworming/all-records");
-      const dewData = await dewRes.json();
-      const petDew = dewData.data.find((item: any) => item.pet_id === selectedPetId);
-      setDeworming(petDew || null);
+        // Deworming
+        const dewRes = await fetch("https://argosmob.com/being-petz/public/api/v1/deworming/all-records");
+        const dewData = await dewRes.json();
+        const petDew = dewData.data.find((item: any) => item.pet_id === selectedPetId);
+        setDeworming(petDew || null);
 
-      // Grooming
-      const groomRes = await fetch("https://argosmob.com/being-petz/public/api/v1/grooming/all-records");
-      const groomData = await groomRes.json();
-      const petGroom = groomData.data.find((item: any) => item.pet_id === selectedPetId);
-      setGrooming(petGroom || null);
+        // Grooming
+        const groomRes = await fetch("https://argosmob.com/being-petz/public/api/v1/grooming/all-records");
+        const groomData = await groomRes.json();
+        const petGroom = groomData.data.find((item: any) => item.pet_id === selectedPetId);
+        setGrooming(petGroom || null);
 
-    } catch (err) {
-      console.error("Error fetching reminders:", err);
-    }
-  };
+      } catch (err) {
+        console.error("Error fetching reminders:", err);
+      }
+    };
 
-  fetchData();
-}, [selectedPetId]); // jab pet change hoga, dobara fetch karega
+    fetchData();
+  }, [selectedPetId]); // jab pet change hoga, dobara fetch karega
 
-  
+
 
   const calculateAge = (dob: string) => {
     if (!dob) return "Age N/A";
@@ -250,58 +226,172 @@ useEffect(() => {
             {/* Combined Left Column */}
             <div className="space-y-4 pr-4 md:pr-6 lg:pr-8 h-fit w-full">
 
-              {/* Pet Info Card */}
-              <div className="bg-gradient-to-b from-purple-600 to-purple-700 rounded-2xl shadow-lg text-white overflow-hidden">
-                {/* Upper (Pet Info) */}
-                <div className="text-center p-6">
-                  <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-4 border-white">
-                    <img
-                      src="https://placedog.net/400/300?id=9"
-                      alt="Pet"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="text-2xl font-bold mt-3">LUNA</h3>
-                  <p className="text-sm">by Jessica S</p>
-                </div>
-
-                {/* Bottom White Section */}
-                <div className="bg-white text-gray-800 text-center px-6 py-4 rounded-9xl">
-                  <p className="text-4xl font-bold">
-                    350 <span className="text-yellow-500">★</span>
-                  </p>
-                  <p className="mt-1 text-sm font-medium">Points Earned</p>
-                  <p className="mt-2 text-xs text-gray-600">
-                    From the "Purr-fect Pounce!" Contest
-                  </p>
-                  <button className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow hover:bg-purple-700 transition">
-                    View Full Leaderboard
-                  </button>
-                </div>
-              </div>
-
               {/* Reminder Section */}
               <div className="bg-white text-gray-800 rounded-2xl shadow-md p-4">
                 <div className="flex items-center space-x-2 text-sm font-medium text-purple-600 bg-purple-100 rounded-lg px-3 py-2 shadow-sm shadow-purple-200">
                   <span className="text-lg">🐾</span>
                   <p>
                     Upcoming:{" "}
-                    <span className="text-gray-800">Oct 25 - Grooming Reminder</span>
+                    <span className="text-gray-800">
+                      {groomingRecords.length > 0
+                        ? (() => {
+                          // Find the next upcoming grooming appointment
+                          const now = new Date();
+                          const upcomingGrooming = groomingRecords
+                            .filter(record => {
+                              const reminderDate = new Date(`${record.reminder_date}T${record.reminder_time || "00:00:00"}`);
+                              return reminderDate > now;
+                            })
+                            .sort((a, b) => {
+                              const dateA = new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`);
+                              const dateB = new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`);
+                              return dateA.getTime() - dateB.getTime();
+                            })[0];
+
+                          return upcomingGrooming
+                            ? `${new Date(upcomingGrooming.reminder_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${upcomingGrooming.type} Reminder`
+                            : "No upcoming grooming";
+                        })()
+                        : "No grooming reminders"
+                      }
+                    </span>
                   </p>
                 </div>
 
-                <div className="mt-3 rounded-xl overflow-hidden">
-                  <img
-                    src="https://placedog.net/400/300?id=3"
-                    alt="Dog"
-                    className="w-full h-50 object-cover"
-                  />
+                <div className="mt-3 flex items-center gap-4">
+                  <div className="rounded-xl overflow-hidden flex-shrink-0">
+                    <img
+                      src={selectedPet?.avatar
+                        ? `https://argosmob.com/being-petz/public/${selectedPet.avatar}`
+                        : "https://placedog.net/200/200?id=3"
+                      }
+                      alt={selectedPet?.name || "Pet"}
+                      className="w-20 h-20 object-cover rounded-lg border-2 border-purple-200"
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-600 mb-2">
+                      <span className="font-semibold text-gray-800">{selectedPet?.name || "Your pet"}</span> has an upcoming grooming session!
+                    </p>
+
+                    {groomingRecords.length > 0 && (() => {
+                      const now = new Date();
+                      const upcomingGrooming = groomingRecords
+                        .filter(record => {
+                          const reminderDate = new Date(`${record.reminder_date}T${record.reminder_time || "00:00:00"}`);
+                          return reminderDate > now;
+                        })
+                        .sort((a, b) => {
+                          const dateA = new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`);
+                          const dateB = new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`);
+                          return dateA.getTime() - dateB.getTime();
+                        })[0];
+
+                      return upcomingGrooming ? (
+                        <div className="bg-blue-50 p-2 rounded-lg">
+                          <p className="text-xs font-medium text-blue-700">
+                            Next: {upcomingGrooming.type} on {new Date(upcomingGrooming.reminder_date).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            Time: {upcomingGrooming.reminder_time || "All day"}
+                          </p>
+                        </div>
+                      ) : null;
+                    })()}
+                  </div>
                 </div>
 
-                <p className="mt-3 text-sm">
-                  <span className="font-semibold text-gray-800">Latest Moment:</span>{" "}
-                  <span className="text-gray-600">"My new favorite sunspot!"</span> ☀️
-                </p>
+                <div className="mt-3 pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500">
+                    🐾 Don't forget to prepare everything needed for the grooming session!
+                  </p>
+                </div>
+              </div>
+              {/* Vaccination Reminder Section */}
+              <div className="bg-white text-gray-800 rounded-2xl shadow-md p-4 mt-4">
+                <div className="flex items-center space-x-2 text-sm font-medium text-green-600 bg-green-100 rounded-lg px-3 py-2 shadow-sm shadow-green-200">
+                  <span className="text-lg">💉</span>
+                  <p>
+                    Vaccination:{" "}
+                    <span className="text-gray-800">
+                      {vaccineRecords.length > 0
+                        ? (() => {
+                          // Find the next upcoming vaccination appointment
+                          const now = new Date();
+                          const upcomingVaccine = vaccineRecords
+                            .filter(record => {
+                              const reminderDate = new Date(`${record.reminder_date}T${record.reminder_time || "00:00:00"}`);
+                              return reminderDate > now;
+                            })
+                            .sort((a, b) => {
+                              const dateA = new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`);
+                              const dateB = new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`);
+                              return dateA.getTime() - dateB.getTime();
+                            })[0];
+
+                          return upcomingVaccine
+                            ? `${new Date(upcomingVaccine.reminder_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${upcomingVaccine.vaccine_name || 'Vaccine'} Reminder`
+                            : "No upcoming vaccination";
+                        })()
+                        : "No vaccination reminders"
+                      }
+                    </span>
+                  </p>
+                </div>
+
+                <div className="mt-3 flex items-center gap-4">
+                  <div className="rounded-xl overflow-hidden flex-shrink-0">
+                    <img
+                      src={selectedPet?.avatar
+                        ? `https://argosmob.com/being-petz/public/${selectedPet.avatar}`
+                        : "https://placedog.net/200/200?id=5"
+                      }
+                      alt={selectedPet?.name || "Pet"}
+                      className="w-20 h-20 object-cover rounded-lg border-2 border-green-200"
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-600 mb-2">
+                      <span className="font-semibold text-gray-800">{selectedPet?.name || "Your pet"}</span> has an upcoming vaccination!
+                    </p>
+
+                    {vaccineRecords.length > 0 && (() => {
+                      const now = new Date();
+                      const upcomingVaccine = vaccineRecords
+                        .filter(record => {
+                          const reminderDate = new Date(`${record.reminder_date}T${record.reminder_time || "00:00:00"}`);
+                          return reminderDate > now;
+                        })
+                        .sort((a, b) => {
+                          const dateA = new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`);
+                          const dateB = new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`);
+                          return dateA.getTime() - dateB.getTime();
+                        })[0];
+
+                      return upcomingVaccine ? (
+                        <div className="bg-green-50 p-2 rounded-lg">
+                          <p className="text-xs font-medium text-green-700">
+                            Next: {upcomingVaccine.vaccine_name || 'Vaccination'} on {new Date(upcomingVaccine.reminder_date).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-green-600">
+                            Type: {upcomingVaccine.type || 'Not specified'}
+                          </p>
+                          <p className="text-xs text-green-600">
+                            Time: {upcomingVaccine.reminder_time || "All day"}
+                          </p>
+                        </div>
+                      ) : null;
+                    })()}
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500">
+                    💉 Keep your pet's vaccinations up to date for their health and safety!
+                  </p>
+                </div>
               </div>
 
               {/* Sponsored Card */}
@@ -616,198 +706,198 @@ useEffect(() => {
 
                     {/* Reminder Tab */}
                     {activeTab === "reminder" && (
-  <div className="bg-pink-100 p-3 sm:p-4 rounded-lg shadow w-full">
-    <h2 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
-      Daily Reminders
-    </h2>
+                      <div className="bg-pink-100 p-3 sm:p-4 rounded-lg shadow w-full">
+                        <h2 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
+                          Daily Reminders
+                        </h2>
 
-    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 text-center">
-      {/* Vaccination */}
-      <div className="bg-yellow-100 p-3 sm:p-4 rounded-lg shadow flex-1">
-        <i className="fas fa-syringe fa-lg sm:fa-2x text-yellow-500 mb-2"></i>
-        <div className="font-semibold">Next Vaccination</div>
-        <div className="text-xs sm:text-sm">
-  {vaccination ? useCountdown(vaccination.reminder_date, vaccination.reminder_time) : "No record"}
-</div>
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 text-center">
+                          {/* Vaccination */}
+                          <div className="bg-yellow-100 p-3 sm:p-4 rounded-lg shadow flex-1">
+                            <i className="fas fa-syringe fa-lg sm:fa-2x text-yellow-500 mb-2"></i>
+                            <div className="font-semibold">Next Vaccination</div>
+                            <div className="text-xs sm:text-sm">
+                              {vaccination ? useCountdown(vaccination.reminder_date, vaccination.reminder_time) : "No record"}
+                            </div>
 
-      </div>
+                          </div>
 
-      {/* Deworming */}
-      <div className="bg-green-100 p-3 sm:p-4 rounded-lg shadow flex-1">
-        <i className="fas fa-bug fa-lg sm:fa-2x text-green-500 mb-2"></i>
-        <div className="font-semibold">Next Deworming</div>
-        <div className="text-xs sm:text-sm">
-          {deworming?.reminder_date
-            ? useCountdown(deworming.reminder_date, deworming.reminder_time)
-            : "No record"}
-        </div>
-      </div>
+                          {/* Deworming */}
+                          <div className="bg-green-100 p-3 sm:p-4 rounded-lg shadow flex-1">
+                            <i className="fas fa-bug fa-lg sm:fa-2x text-green-500 mb-2"></i>
+                            <div className="font-semibold">Next Deworming</div>
+                            <div className="text-xs sm:text-sm">
+                              {deworming?.reminder_date
+                                ? useCountdown(deworming.reminder_date, deworming.reminder_time)
+                                : "No record"}
+                            </div>
+                          </div>
 
-      {/* Grooming */}
-      <div className="bg-blue-100 p-3 sm:p-4 rounded-lg shadow flex-1">
-        <i className="fas fa-cut fa-lg sm:fa-2x text-blue-500 mb-2"></i>
-        <div className="font-semibold">Grooming</div>
-        <div className="text-xs sm:text-sm">
-          {grooming?.reminder_date
-            ? useCountdown(grooming.reminder_date, grooming.reminder_time)
-            : "No record"}
-        </div>
-      </div>
-    </div>
+                          {/* Grooming */}
+                          <div className="bg-blue-100 p-3 sm:p-4 rounded-lg shadow flex-1">
+                            <i className="fas fa-cut fa-lg sm:fa-2x text-blue-500 mb-2"></i>
+                            <div className="font-semibold">Grooming</div>
+                            <div className="text-xs sm:text-sm">
+                              {grooming?.reminder_date
+                                ? useCountdown(grooming.reminder_date, grooming.reminder_time)
+                                : "No record"}
+                            </div>
+                          </div>
+                        </div>
 
-    {/* Create Reminder Button */}
-    <div className="flex justify-center mt-4">
-      <button className="px-3 sm:px-4 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition text-sm sm:text-base">
-        Create Reminder
-      </button>
-    </div>
-  </div>
-)}
+                        {/* Create Reminder Button */}
+                        <div className="flex justify-center mt-4">
+                          <button className="px-3 sm:px-4 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition text-sm sm:text-base">
+                            Create Reminder
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
 
                     {/* Records Tab */}
                     {activeTab === "records" && (
-  <div className="bg-pink-100 p-4 rounded-lg w-full space-y-6">
-    {/* Vaccination Records */}
-    <div>
-      <h2 className="text-lg font-bold mb-4">
-        Vaccinations for {selectedPet?.name || "Pet"}
-      </h2>
-      {vaccineRecords.length > 0 ? (
-        vaccineRecords.map((record, idx) => (
-          <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
-            <img
-              src={`https://argosmob.com/being-petz/public/${record.image_path}`}
-              alt={record.vaccine_name}
-              className="w-28 h-28 rounded-lg object-cover"
-            />
-            <div
-              className="flex flex-col justify-center rounded-md p-4 w-full"
-              style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
-            >
-              <h3 className="font-bold text-purple-700">{record.vaccine_name}</h3>
-              <p className="text-xs">Type: {record.type}</p>
-              <p className="text-xs">Date: {record.date}</p>
-              <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
-              {record.next_vaccine && (
-                <p className="text-xs text-blue-600 font-semibold">
-                  Next Vaccine: {record.next_vaccine}
-                </p>
-              )}
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-600 text-center">No vaccination records found.</p>
-      )}
-    </div>
+                      <div className="bg-pink-100 p-4 rounded-lg w-full space-y-6">
+                        {/* Vaccination Records */}
+                        <div>
+                          <h2 className="text-lg font-bold mb-4">
+                            Vaccinations for {selectedPet?.name || "Pet"}
+                          </h2>
+                          {vaccineRecords.length > 0 ? (
+                            vaccineRecords.map((record, idx) => (
+                              <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
+                                <img
+                                  src={`https://argosmob.com/being-petz/public/${record.image_path}`}
+                                  alt={record.vaccine_name}
+                                  className="w-28 h-28 rounded-lg object-cover"
+                                />
+                                <div
+                                  className="flex flex-col justify-center rounded-md p-4 w-full"
+                                  style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
+                                >
+                                  <h3 className="font-bold text-purple-700">{record.vaccine_name}</h3>
+                                  <p className="text-xs">Type: {record.type}</p>
+                                  <p className="text-xs">Date: {record.date}</p>
+                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                  {record.next_vaccine && (
+                                    <p className="text-xs text-blue-600 font-semibold">
+                                      Next Vaccine: {record.next_vaccine}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-600 text-center">No vaccination records found.</p>
+                          )}
+                        </div>
 
-    {/* Deworming Records */}
-    <div>
-      <h2 className="text-lg font-bold mb-4">Deworming Records</h2>
-      {dewormingRecords.length > 0 ? (
-        dewormingRecords.map((record, idx) => (
-          <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
-            <img
-              src={`https://argosmob.com/being-petz/public/${record.image_path}`}
-              alt={record.type}
-              className="w-28 h-28 rounded-lg object-cover"
-            />
-            <div className="flex flex-col justify-center rounded-md p-4 w-full bg-green-50">
-              <h3 className="font-bold text-green-700">Type: {record.type}</h3>
-              <p className="text-xs">Date: {record.date}</p>
-              <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-600 text-center">No deworming records found.</p>
-      )}
-    </div>
+                        {/* Deworming Records */}
+                        <div>
+                          <h2 className="text-lg font-bold mb-4">Deworming Records</h2>
+                          {dewormingRecords.length > 0 ? (
+                            dewormingRecords.map((record, idx) => (
+                              <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
+                                <img
+                                  src={`https://argosmob.com/being-petz/public/${record.image_path}`}
+                                  alt={record.type}
+                                  className="w-28 h-28 rounded-lg object-cover"
+                                />
+                                <div className="flex flex-col justify-center rounded-md p-4 w-full bg-green-50">
+                                  <h3 className="font-bold text-green-700">Type: {record.type}</h3>
+                                  <p className="text-xs">Date: {record.date}</p>
+                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-600 text-center">No deworming records found.</p>
+                          )}
+                        </div>
 
-    {/* Grooming Records */}
-    <div>
-      <h2 className="text-lg font-bold mb-4">Grooming Records</h2>
-      {groomingRecords.length > 0 ? (
-        groomingRecords.map((record, idx) => (
-          <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
-            <img
-              src={`https://argosmob.com/being-petz/public/${record.image_path}`}
-              alt={record.type}
-              className="w-28 h-28 rounded-lg object-cover"
-            />
-            <div
-              className="flex flex-col justify-center rounded-md p-4 w-full"
-              style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
-            >
-              <h3 className="font-bold text-blue-700">Type: {record.type}</h3>
-              <p className="text-xs">Date: {record.date}</p>
-              <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
-              {record.next_grooming && (
-                <p className="text-xs text-blue-600 font-semibold">
-                  Next Grooming: {record.next_grooming}
-                </p>
-              )}
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-600 text-center">No grooming records found.</p>
-      )}
-    </div>
+                        {/* Grooming Records */}
+                        <div>
+                          <h2 className="text-lg font-bold mb-4">Grooming Records</h2>
+                          {groomingRecords.length > 0 ? (
+                            groomingRecords.map((record, idx) => (
+                              <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
+                                <img
+                                  src={`https://argosmob.com/being-petz/public/${record.image_path}`}
+                                  alt={record.type}
+                                  className="w-28 h-28 rounded-lg object-cover"
+                                />
+                                <div
+                                  className="flex flex-col justify-center rounded-md p-4 w-full"
+                                  style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
+                                >
+                                  <h3 className="font-bold text-blue-700">Type: {record.type}</h3>
+                                  <p className="text-xs">Date: {record.date}</p>
+                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                  {record.next_grooming && (
+                                    <p className="text-xs text-blue-600 font-semibold">
+                                      Next Grooming: {record.next_grooming}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-600 text-center">No grooming records found.</p>
+                          )}
+                        </div>
 
-    {/* Meal Records */}
-    <div>
-      <h2 className="text-lg font-bold mb-4">Meal Records</h2>
-      {mealRecords.length > 0 ? (
-        mealRecords.map((record, idx) => (
-          <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
-            <div
-              className="rounded-md p-4 w-full"
-              style={{ backgroundColor: record.bg_color || "#FFF" }}
-            >
-              <h3 className="font-bold text-orange-700">Meal Time: {record.meal_time}</h3>
-              <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-600 text-center">No meal records found.</p>
-      )}
-    </div>
+                        {/* Meal Records */}
+                        <div>
+                          <h2 className="text-lg font-bold mb-4">Meal Records</h2>
+                          {mealRecords.length > 0 ? (
+                            mealRecords.map((record, idx) => (
+                              <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
+                                <div
+                                  className="rounded-md p-4 w-full"
+                                  style={{ backgroundColor: record.bg_color || "#FFF" }}
+                                >
+                                  <h3 className="font-bold text-orange-700">Meal Time: {record.meal_time}</h3>
+                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-600 text-center">No meal records found.</p>
+                          )}
+                        </div>
 
-    {/* Weight Records */}
-    <div>
-      <h2 className="text-lg font-bold mb-4">Weight Records</h2>
-      {weightRecords.length > 0 ? (
-        weightRecords.map((record, idx) => (
-          <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
-            <div
-              className="rounded-md p-4 w-full"
-              style={{ backgroundColor: record.bg_color || "#EEE" }}
-            >
-              <h3 className="font-bold text-brown-700">Weight: {record.weight} kg</h3>
-              <p className="text-xs">Date: {record.date}</p>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-600 text-center">No weight records found.</p>
-      )}
-    </div>
-     {/* Button */}
- <div className="text-center">
-                      <button
-                        onClick={() => navigate("/managerecord")}
-                        className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-full hover:bg-purple-700 transition"
-                      >
-                        Manage Records
-                      </button>
-                    </div>
-  </div>
-)}
+                        {/* Weight Records */}
+                        <div>
+                          <h2 className="text-lg font-bold mb-4">Weight Records</h2>
+                          {weightRecords.length > 0 ? (
+                            weightRecords.map((record, idx) => (
+                              <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
+                                <div
+                                  className="rounded-md p-4 w-full"
+                                  style={{ backgroundColor: record.bg_color || "#EEE" }}
+                                >
+                                  <h3 className="font-bold text-brown-700">Weight: {record.weight} kg</h3>
+                                  <p className="text-xs">Date: {record.date}</p>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-gray-600 text-center">No weight records found.</p>
+                          )}
+                        </div>
+                        {/* Button */}
+                        <div className="text-center">
+                          <button
+                            onClick={() => navigate("/managerecord")}
+                            className="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-full hover:bg-purple-700 transition"
+                          >
+                            Manage Records
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
- 
+
 
 
 

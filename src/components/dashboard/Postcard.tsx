@@ -267,9 +267,9 @@
 // export default PostCard;
 
  
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaThumbsUp, FaComment, FaShare, FaPaperPlane } from "react-icons/fa";
 
 interface Parent {
   id: number;
@@ -312,10 +312,11 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   const [newComment, setNewComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count || 0);
   const [loadingComment, setLoadingComment] = useState(false);
+  const [showComments, setShowComments] = useState(false); 
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // ✅ Like handler
+  // Like handler
   const handleLike = async () => {
     try {
       const res = await axios.post(
@@ -327,11 +328,8 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       );
 
       if (res.data.status) {
-        if (isLiked) {
-          setLikeCount((prev) => prev - 1);
-        } else {
-          setLikeCount((prev) => prev + 1);
-        }
+        if (isLiked) setLikeCount((prev) => prev - 1);
+        else setLikeCount((prev) => prev + 1);
         setIsLiked(!isLiked);
       }
     } catch (err) {
@@ -339,7 +337,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     }
   };
 
-  // ✅ Fetch comments
+  // Fetch comments
   const fetchComments = async () => {
     try {
       const res = await axios.post(
@@ -352,7 +350,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
     }
   };
 
-  // ✅ Add new comment
+  // Add comment
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
@@ -370,6 +368,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       if (res.data.status) {
         setNewComment("");
         setCommentCount((prev) => prev + 1);
+        setShowComments(true);  
         fetchComments();
       }
     } catch (err) {
@@ -380,18 +379,18 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   };
 
   useEffect(() => {
-    fetchComments();
-  }, [post.id]);
+    if (showComments) fetchComments();  
+  }, [showComments, post.id]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-5 max-w-xl w-full mx-auto">
+    <div className="bg-white rounded-xl shadow-lg p-5 max-w-xl w-full mx-auto mb-6">
       {/* Top Section */}
       <div className="flex items-start gap-4 mb-4">
         <img
           src={
             post.parent?.avatar
               ? `https://argosmob.com/being-petz/public/${post.parent.avatar}`
-              : "https://images.unsplash.com/profile-1446404465118-3a53b909cc82?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&cs=tinysrgb&fit=crop&h=32&w=32&s=a2f8c40e39b8dfee1534eb32acfa6bc7"
+              : "https://via.placeholder.com/40"
           }
           alt={post.parent?.first_name}
           className="w-12 h-12 rounded-full object-cover"
@@ -438,7 +437,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         </div>
       </div>
 
-      {/* Buttons */}
+      {/* Buttons with Icons */}
       <div className="flex justify-around border-y py-3 text-gray-600 text-sm font-medium">
         <div
           onClick={handleLike}
@@ -446,89 +445,89 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             isLiked ? "text-blue-600 font-semibold" : "hover:bg-gray-100"
           }`}
         >
-          {isLiked ? "Liked" : "Like"}
+          <FaThumbsUp /> {isLiked ? "Liked" : "Like"}
+        </div>
+        <div
+          onClick={() => setShowComments((prev) => !prev)} // toggle comments
+          className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded"
+        >
+          <FaComment /> Comment
         </div>
         <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded">
-          Comment
-        </div>
-        <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-4 py-1 rounded">
-          Share
+          <FaShare /> Share
         </div>
       </div>
 
       {/* Comments */}
-      <div className="mt-4 space-y-4">
-        {commentList.map((c) => {
-         // Values of comment
-          let displayName = "Anonymous";
-          let avatarUrl = "https://avatar.iran.liara.run/username?username=[firstname+lastname]";
+      {showComments && (
+        <div className="mt-4 space-y-4">
+          {commentList.map((c) => {
+            let displayName = "Anonymous";
+            let avatarUrl = "https://via.placeholder.com/36";
 
-          // Agar API se user mila toh use karo
-          if (c.user?.first_name) {
-            displayName =
-              c.user.first_name +
-              (c.user.last_name ? " " + c.user.last_name : "");
-            if (c.user.avatar) {
-              avatarUrl = `https://argosmob.com/being-petz/public/${c.user.avatar}`;
-            }
-          } else {
-            // Agar API missing hai, aur yeh logged-in user ka comment hai
-            if (user && user.id === c.parent_id) {
+            if (c.user?.first_name) {
+              displayName =
+                c.user.first_name +
+                (c.user.last_name ? " " + c.user.last_name : "");
+              if (c.user.avatar) {
+                avatarUrl = `https://argosmob.com/being-petz/public/${c.user.avatar}`;
+              }
+            } else if (user && user.id === c.parent_id) {
               displayName =
                 user.first_name + (user.last_name ? " " + user.last_name : "");
               if (user.avatar) {
                 avatarUrl = `https://argosmob.com/being-petz/public/${user.avatar}`;
               }
             }
-          }
 
-          return (
-            <div key={c.id} className="flex gap-3 items-start">
-              <img
-                src={avatarUrl}
-                alt={displayName}
-                className="w-9 h-9 rounded-full object-cover"
-              />
-              <div className="flex-1">
-                <p className="text-sm bg-gray-100 rounded-lg px-4 py-2">
-                  <span className="font-semibold">{displayName}</span> {c.comment}
-                </p>
-                <div className="text-xs text-gray-500 flex gap-3 mt-1">
-                  <span>{c.human_date}</span>
+            return (
+              <div key={c.id} className="flex gap-3 items-start">
+                <img
+                  src={avatarUrl}
+                  alt={displayName}
+                  className="w-9 h-9 rounded-full object-cover"
+                />
+                <div className="flex-1">
+                  <p className="text-sm bg-gray-100 rounded-lg px-4 py-2">
+                    <span className="font-semibold">{displayName}</span> {c.comment}
+                  </p>
+                  <div className="text-xs text-gray-500 flex gap-3 mt-1">
+                    <span>{c.human_date}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        {/* Add comment */}
-        <div className="flex items-center gap-3 mt-3">
-          <img
-            src={
-              user.avatar
-                ? `https://argosmob.com/being-petz/public/${user.avatar}`
-                : "https://avatar.iran.liara.run/username?username=[firstname+lastname]"
-            }
-            alt="you"
-            className="w-9 h-9 rounded-full object-cover"
-          />
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Enter Your Comment"
-            className="flex-1 border rounded-full px-4 py-2 text-sm"
-            disabled={loadingComment}
-          />
-          <button
-            onClick={handleAddComment}
-            className="text-gray-400 hover:text-purple-600 p-2"
-            disabled={loadingComment}
-          >
-            ➤
-          </button>
+          {/* Add comment */}
+          <div className="flex items-center gap-3 mt-3">
+            <img
+              src={
+                user.avatar
+                  ? `https://argosmob.com/being-petz/public/${user.avatar}`
+                  : "https://via.placeholder.com/36"
+              }
+              alt="you"
+              className="w-9 h-9 rounded-full object-cover"
+            />
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Enter Your Comment"
+              className="flex-1 border rounded-full px-4 py-2 text-sm"
+              disabled={loadingComment}
+            />
+            <button
+              onClick={handleAddComment}
+              className="text-gray-400 hover:text-purple-600 p-2"
+              disabled={loadingComment}
+            >
+              <FaPaperPlane />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

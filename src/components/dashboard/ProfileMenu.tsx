@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Edit, Settings, Lock, LogOut } from 'lucide-react';
+import { User, Edit,  LogOut } from 'lucide-react';
 import profile from "../../assets/img/profile.jpeg";
 import img1 from "../../assets/user/03.jpg";
 import cat from "../../assets/img/cat.jpg";
@@ -98,7 +98,7 @@ const ProfileMenu: React.FC = () => {
           </Link>
         </li>
 
-        <li>
+        {/* <li>
           <Link
             to="/settings"
             className="flex items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer"
@@ -126,7 +126,7 @@ const ProfileMenu: React.FC = () => {
               <p className="text-sm text-gray-500">Control your privacy parameters.</p>
             </div>
           </Link>
-        </li>
+        </li> */}
       </ul>
 
       {/* Sign Out */}

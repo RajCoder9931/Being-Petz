@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
- import CircleAnimation from '../common/CircleAnimation';
+import CircleAnimation from '../common/CircleAnimation';
 import ImageCarousel from '../common/ImageCarousel';
 import Img1 from '../../assets/img/1.webp';
 import Img2 from '../../assets/img/2.avif';
@@ -27,6 +27,7 @@ const SignUp = () => {
   const [otp, setOtp] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false); // tracks OTP verification
 
   const carouselItems = [
     { image: Img1, title: 'Welcome Back', description: 'Log in to your account to manage your pets and events.' },
@@ -37,10 +38,7 @@ const SignUp = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
   // Handle Signup
@@ -64,19 +62,19 @@ const SignUp = () => {
           first_name: formData.firstName,
           last_name: formData.lastName,
           email: formData.email,
-        })
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.status) {
-        setUserId(data.data.id); 
-        setOtpModalOpen(true);    
+        setUserId(data.data.id);       // Save user ID for OTP verification
+        setOtpModalOpen(true);         // Open OTP modal
         setStatusType('success');
-        setStatusMessage('OTP sent to your email.');
+        setStatusMessage('OTP sent to your email. Please verify to complete registration.');
       } else {
         setStatusType('error');
-        setStatusMessage(data.message || 'Signup Failed. Please try again.');
+        setStatusMessage(data.message || 'Signup failed. Please try again.');
       }
     } catch (error) {
       setStatusType('error');
@@ -90,24 +88,31 @@ const SignUp = () => {
   const handleVerifyOtp = async () => {
     if (!otp || !userId) return;
 
+    setLoading(true);
     try {
-      const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/register-verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, otp })
-      });
+      const response = await fetch(
+        "https://argosmob.com/being-petz/public/api/v1/auth/register-verify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, otp }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok && data.status) {
-        alert("User verified successfully!");
-        setOtpModalOpen(false);
-        navigate("/login");  
+        setOtpVerified(true);           // OTP verified successfully
+        setOtpModalOpen(false);         // close modal
+        alert("User verified successfully! You can now log in.");
+        navigate("/login");
       } else {
-        alert(data.message || "Invalid OTP, please try again.");
+        alert(data.message || "Invalid OTP. Please try again.");
       }
     } catch (error) {
       alert("Something went wrong while verifying OTP.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,20 +122,19 @@ const SignUp = () => {
     setResendLoading(true);
 
     try {
-      const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-        })
-      });
+      const response = await fetch(
+        "https://argosmob.com/being-petz/public/api/v1/auth/resend-otp",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok && data.status) {
-        alert(" OTP resent to your email.");
+        alert("OTP resent to your email.");
       } else {
         alert(data.message || "Failed to resend OTP.");
       }
@@ -143,18 +147,18 @@ const SignUp = () => {
 
   return (
     <div className="flex min-h-screen w-full">
-      {/* Left side with purple gradient and promo content */}
-      <div className="hidden md:flex md:w-1/2   bg-gradient-to-br from-purple-600 to-purple-400 flex-col items-center justify-center p-10 text-white relative overflow-hidden">
+      {/* Left side */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-purple-600 to-purple-400 flex-col items-center justify-center p-6 text-white relative overflow-hidden">
         <CircleAnimation />
         <div className="z-10 flex flex-col items-center">
           <img src={logo} alt="Being Petz Logo" className="w-48 mb-10" />
-          <div className="backdrop-blur-sm rounded-lg w-72 h-32">
+          <div className="backdrop-blur-sm rounded-lg w-72  ">
             <ImageCarousel items={carouselItems} interval={5000} className="w-full h-full" />
           </div>
         </div>
       </div>
 
-      {/* Right side with sign up form */}
+      {/* Right side with form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Create Account</h1>
@@ -217,12 +221,9 @@ const SignUp = () => {
                 className="mr-2"
                 required
               />
-
               <label htmlFor="acceptTerms" className="text-gray-700">
                 I accept Terms and Conditions {' '}
-                <span className="text-purple-600 hover:underline">
-                  Read Now 
-                </span>
+                <span className="text-purple-600 hover:underline">Read Now</span>
               </label>
             </div>
 
@@ -232,9 +233,10 @@ const SignUp = () => {
                 {statusMessage}
               </p>
             )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || otpModalOpen || otpVerified} // Prevent signup until OTP verified
               className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 disabled:opacity-60"
             >
               {loading ? "Signing Up..." : "Create Account"}
@@ -245,11 +247,8 @@ const SignUp = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-600">
               Already Have An Account?{' '}
-              <Link to="/login" className="text-purple-600 hover:underline">
-                Login here!
-              </Link>
+              <Link to="/login" className="text-purple-600 hover:underline">Login here!</Link>
             </p>
-             
           </div>
         </div>
       </div>
@@ -300,6 +299,4 @@ const SignUp = () => {
 export default SignUp;
 
 
-
-
-
+ 

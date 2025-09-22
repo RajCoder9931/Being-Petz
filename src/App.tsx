@@ -19,8 +19,17 @@ import NotificationsPanel from './pages/NotificationsPage';
 import EditProfile from './components/Profile/Editprofile';
 import PrivacySettingsPage from './pages/PrivacySettingsPage';
 import Foundpet from './pages/Lostfound';
+import Test from './components/Profile/PetDetails';
+import MyPets from "./components/Profile/MyPets";
+import PetQRPage from "./components/Profile/PetDetails";
+import AddPetPage from './components/Profile/AddPetForm';
    export function App() {
+    const userId = 1; // example, replace with your auth logic
+  const handlePetAdded = (pet: any) => {
+    console.log("Pet added!", pet);
+  }
   return (
+    
     <Router>
       <Routes>
         
@@ -45,6 +54,11 @@ import Foundpet from './pages/Lostfound';
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/privacy-settings" element={<PrivacySettingsPage />} />
         <Route path="/report-found-pet" element={<Foundpet />} />
+        <Route path="/test" element={< Test/>}/>
+        <Route path="/my-pets" element={<MyPets />} />
+        <Route path="/pet-qr/:id" element={<PetQRPage />} />
+        <Route path="/add-pet" element={<AddPetPage userId={userId} onPetAdded={handlePetAdded} />} />
+
         </Routes>
       <Footer />
     </Router>

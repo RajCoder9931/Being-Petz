@@ -37,6 +37,8 @@ function PetParentProfile() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [parentId, setParentId] = useState<number | null>(null);
+  const [petCount, setPetCount] = useState(0);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -57,7 +59,32 @@ function PetParentProfile() {
       setParentId(parsedUser.id);
     }
   }, []);
-
+   
+  useEffect(() => {
+    const fetchMyPets = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) return;
+  
+        const parsedUser = JSON.parse(storedUser);
+        const userId = parsedUser.id;
+  
+        const response = await axios.get(
+          `https://argosmob.uk/being-petz/public/api/v1/auth/my-detail?user_id=${userId}`
+        );
+  
+        if (response.data && response.data.user) {
+          setPetCount(response.data.user.pets?.length || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch pets:", err);
+      }
+    };
+  
+    fetchMyPets();
+  }, []);
+  
+  
   const dummyImages = [
     profile,  
     img1,
@@ -204,19 +231,20 @@ function PetParentProfile() {
                 </p>
 
                 <div className="flex space-x-8 mt-4 text-center">
-                  <div>
-                    <p className="text-lg font-bold text-purple-700">3</p>
-                    <p className="text-sm text-gray-500">Pets</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-purple-700">128</p>
-                    <p className="text-sm text-gray-500">Friends</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-purple-700">342</p>
-                    <p className="text-sm text-gray-500">Posts</p>
-                  </div>
-                </div>
+  <div>
+    <p className="text-lg font-bold text-purple-700">{petCount}</p>
+    <p className="text-sm text-gray-500">Pets</p>
+  </div>
+  <div>
+    <p className="text-lg font-bold text-purple-700">128</p>
+    <p className="text-sm text-gray-500">Friends</p>
+  </div>
+  <div>
+    <p className="text-lg font-bold text-purple-700">342</p>
+    <p className="text-sm text-gray-500">Posts</p>
+  </div>
+</div>
+
 
                 <div className="flex items-center space-x-2 mt-6">
                   <button

@@ -6,7 +6,7 @@ import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Header from "../dashboard/Header";
 import Sidebar from "../dashboard/sidebar";
- 
+
 const Petprofile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"records" | "reminder" | "profile">("records");
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const Petprofile: React.FC = () => {
     dob: "2020-05-15",
     breed: "German Shepherd",
     gender: "Male",
-    blood: "DEA 1",
+    type: "DEA 1",
   });
 
   useEffect(() => {
@@ -64,10 +64,7 @@ const Petprofile: React.FC = () => {
   }, [user]);
 
 
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log("Saved Data:", formData);
-  };
+
   // vaccination details
   const [vaccineRecords, setVaccineRecords] = useState<any[]>([]);
   const [dewormingRecords, setDewormingRecords] = useState<any[]>([]);
@@ -156,43 +153,76 @@ const Petprofile: React.FC = () => {
 
     return timeLeft;
   };
-  const [selectedPetId, setSelectedPetId] = useState<number | null>(36);
+  // reminder
   const [vaccination, setVaccination] = useState<any>(null);
   const [deworming, setDeworming] = useState<any>(null);
   const [grooming, setGrooming] = useState<any>(null);
 
   useEffect(() => {
-    if (!selectedPetId) return;
+    if (!selectedPet?.id) return;
 
-    const fetchData = async () => {
+    const fetchReminders = async () => {
       try {
         // Vaccination
-        const vacRes = await fetch("https://argosmob.com/being-petz/public/api/v1/vaccine/all-records");
-        const vacData = await vacRes.json();
-        const petVac = vacData.data.find((item: any) => item.pet_id === selectedPetId);
-        setVaccination(petVac || null);
+        const vacRes = await axios.post(
+          "https://argosmob.com/being-petz/public/api/v1/vaccine/all-records",
+          { pet_id: selectedPet.id }
+        );
+        if (vacRes.data?.data?.length) {
+          const upcoming = vacRes.data.data
+            .filter((item: any) => new Date(`${item.reminder_date}T${item.reminder_time || "00:00:00"}`) > new Date())
+            .sort((a: any, b: any) =>
+              new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`).getTime() -
+              new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`).getTime()
+            )[0];
+          setVaccination(upcoming || null);
+        } else {
+          setVaccination(null);
+        }
 
         // Deworming
-        const dewRes = await fetch("https://argosmob.com/being-petz/public/api/v1/deworming/all-records");
-        const dewData = await dewRes.json();
-        const petDew = dewData.data.find((item: any) => item.pet_id === selectedPetId);
-        setDeworming(petDew || null);
+        const dewRes = await axios.post(
+          "https://argosmob.com/being-petz/public/api/v1/deworming/all-records",
+          { pet_id: selectedPet.id }
+        );
+        if (dewRes.data?.data?.length) {
+          const upcoming = dewRes.data.data
+            .filter((item: any) => new Date(`${item.reminder_date}T${item.reminder_time || "00:00:00"}`) > new Date())
+            .sort((a: any, b: any) =>
+              new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`).getTime() -
+              new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`).getTime()
+            )[0];
+          setDeworming(upcoming || null);
+        } else {
+          setDeworming(null);
+        }
 
         // Grooming
-        const groomRes = await fetch("https://argosmob.com/being-petz/public/api/v1/grooming/all-records");
-        const groomData = await groomRes.json();
-        const petGroom = groomData.data.find((item: any) => item.pet_id === selectedPetId);
-        setGrooming(petGroom || null);
-
+        const groomRes = await axios.post(
+          "https://argosmob.com/being-petz/public/api/v1/grooming/all-records",
+          { pet_id: selectedPet.id }
+        );
+        if (groomRes.data?.data?.length) {
+          const upcoming = groomRes.data.data
+            .filter((item: any) => new Date(`${item.reminder_date}T${item.reminder_time || "00:00:00"}`) > new Date())
+            .sort((a: any, b: any) =>
+              new Date(`${a.reminder_date}T${a.reminder_time || "00:00:00"}`).getTime() -
+              new Date(`${b.reminder_date}T${b.reminder_time || "00:00:00"}`).getTime()
+            )[0];
+          setGrooming(upcoming || null);
+        } else {
+          setGrooming(null);
+        }
       } catch (err) {
         console.error("Error fetching reminders:", err);
+        setVaccination(null);
+        setDeworming(null);
+        setGrooming(null);
       }
     };
 
-    fetchData();
-  }, [selectedPetId]); // jab pet change hoga, dobara fetch karega
-
-
+    fetchReminders();
+  }, [selectedPet]);
 
   const calculateAge = (dob: string) => {
     if (!dob) return "Age N/A";
@@ -209,6 +239,79 @@ const Petprofile: React.FC = () => {
     if (months <= 0) return `${years} Year${years > 1 ? "s" : ""} Old`;
     return `${years} Year${years > 1 ? "s" : ""} ${months} Month${months > 1 ? "s" : ""} Old`;
   };
+
+  // pet details edit 
+  // Sync formData when selectedPet changes
+  useEffect(() => {
+    if (selectedPet) {
+      setFormData({
+        name: selectedPet.name || "",
+        dob: selectedPet.dob || "",
+        breed: selectedPet.breed || "",
+        gender: selectedPet.gender || "",
+        type: selectedPet.type || "",
+      });
+    }
+  }, [selectedPet]);
+
+  // Save handler
+  const handleSave = async () => {
+    if (!selectedPet?.id || !user) return;
+
+    try {
+      const payload = {
+        user_id: user.id || user.user_id,
+        pet_id: selectedPet.id,
+        id: selectedPet.id,
+        name: formData.name,
+        dob: formData.dob,
+        breed: formData.breed,
+        gender: formData.gender,
+        type: formData.type,
+      };
+
+      console.log("Payload sending:", payload);
+
+      const res = await axios.post(
+        "https://argosmob.com/being-petz/public/api/v1/pet/update",
+        payload
+      );
+
+      console.log("Update Response:", res.data);
+
+      if (res.data?.success || res.data?.status) {
+        const updatedPet = { ...selectedPet, ...formData };
+        setSelectedPet(updatedPet);
+        setPets((prev) =>
+          prev.map((pet) => (pet.id === selectedPet.id ? updatedPet : pet))
+        );
+        setIsEditing(false);
+      } else {
+        alert(res.data?.message || "Failed to update pet details.");
+      }
+    } catch (error) {
+      console.error("Error updating pet:", error);
+      alert("Something went wrong while updating pet.");
+    }
+  };
+  // 🔹 Top of component
+  const vaccinationCountdown = useCountdown(
+    vaccination?.reminder_date ?? null,
+    vaccination?.reminder_time ?? null
+  );
+
+  const dewormingCountdown = useCountdown(
+    deworming?.reminder_date ?? null,
+    deworming?.reminder_time ?? null
+  );
+
+  const groomingCountdown = useCountdown(
+    grooming?.reminder_date ?? null,
+    grooming?.reminder_time ?? null
+  );
+
+
+
 
   return (
     <div className="flex min-h-screen bg-gray-50 pt-12">
@@ -521,7 +624,7 @@ const Petprofile: React.FC = () => {
                 {/* Add Pet */}
                 <div
                   className="flex flex-col items-center cursor-pointer hover:scale-105 transition"
-                  onClick={() => navigate("/petform")}
+                  onClick={() => navigate("/add-pet")}
                 >
                   <div className="w-20 h-20 rounded-full border-4 border-purple-600 flex items-center justify-center text-purple-600 text-3xl">
                     +
@@ -673,12 +776,12 @@ const Petprofile: React.FC = () => {
                               </select>
                               <input
                                 type="text"
-                                value={formData.blood}
+                                value={formData.type}
                                 onChange={(e) =>
-                                  setFormData({ ...formData, blood: e.target.value })
+                                  setFormData({ ...formData, type: e.target.value })
                                 }
                                 className="bg-white p-2 rounded-lg shadow text-sm sm:text-base w-full sm:col-span-2"
-                                placeholder="Blood Group"
+                                placeholder="type Group"
                               />
                             </>
                           ) : (
@@ -696,7 +799,7 @@ const Petprofile: React.FC = () => {
                                 <strong>Gender:</strong> {formData.gender}
                               </div>
                               <div className="bg-green-100 p-2 sm:p-3 rounded-lg shadow text-sm sm:text-base sm:col-span-2">
-                                <strong>Blood Group:</strong> {formData.blood}
+                                <strong>Pet Type:</strong> {formData.type}
                               </div>
                             </>
                           )}
@@ -717,9 +820,15 @@ const Petprofile: React.FC = () => {
                             <i className="fas fa-syringe fa-lg sm:fa-2x text-yellow-500 mb-2"></i>
                             <div className="font-semibold">Next Vaccination</div>
                             <div className="text-xs sm:text-sm">
-                              {vaccination ? useCountdown(vaccination.reminder_date, vaccination.reminder_time) : "No record"}
+                              {vaccination ? (
+                                <>
+                                  <p className="font-medium">{vaccination.vaccine_name}</p>
+                                  <p>{vaccinationCountdown || "Upcoming soon"}</p>
+                                </>
+                              ) : (
+                                "No record"
+                              )}
                             </div>
-
                           </div>
 
                           {/* Deworming */}
@@ -727,32 +836,39 @@ const Petprofile: React.FC = () => {
                             <i className="fas fa-bug fa-lg sm:fa-2x text-green-500 mb-2"></i>
                             <div className="font-semibold">Next Deworming</div>
                             <div className="text-xs sm:text-sm">
-                              {deworming?.reminder_date
-                                ? useCountdown(deworming.reminder_date, deworming.reminder_time)
-                                : "No record"}
+                              {deworming ? (
+                                <>
+                                  <p className="font-medium">{deworming.type}</p>
+                                  <p>{dewormingCountdown || "Upcoming soon"}</p>
+                                </>
+                              ) : (
+                                "No record"
+                              )}
                             </div>
                           </div>
 
                           {/* Grooming */}
                           <div className="bg-blue-100 p-3 sm:p-4 rounded-lg shadow flex-1">
                             <i className="fas fa-cut fa-lg sm:fa-2x text-blue-500 mb-2"></i>
-                            <div className="font-semibold">Grooming</div>
+                            <div className="font-semibold">Next Grooming</div>
                             <div className="text-xs sm:text-sm">
-                              {grooming?.reminder_date
-                                ? useCountdown(grooming.reminder_date, grooming.reminder_time)
-                                : "No record"}
+                              {grooming ? (
+                                <>
+                                  <p className="font-medium">{grooming.type}</p>
+                                  <p>{groomingCountdown || "Upcoming soon"}</p>
+                                </>
+                              ) : (
+                                "No record"
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        {/* Create Reminder Button */}
-                        <div className="flex justify-center mt-4">
-                          <button className="px-3 sm:px-4 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition text-sm sm:text-base">
-                            Create Reminder
-                          </button>
-                        </div>
+
                       </div>
                     )}
+
+
 
 
                     {/* Records Tab */}
@@ -896,11 +1012,6 @@ const Petprofile: React.FC = () => {
                         </div>
                       </div>
                     )}
-
-
-
-
-
 
                   </div>
 

@@ -259,7 +259,7 @@ function Login() {
     rememberMe: false
   });
 
-  const [userId, setUserId] = useState<string | null>(null); // ✅ store user_id
+  const [userId, setUserId] = useState<string | null>(null);  
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -327,10 +327,10 @@ function Login() {
     setMessage(null);
 
     try {
-      const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/register-verify", {
+      const response = await fetch("https://argosmob.com/being-petz/public/api/v1/auth/login-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, otp: formData.otp }), // ✅ include user_id
+        body: JSON.stringify({ user_id: userId, otp: formData.otp }),  
       });
 
       const data = await response.json();

@@ -11,7 +11,7 @@ import Buddy from "../../assets/img/adopt2.avif";
 import cat from "../../assets/img/cat.jpg";
 import { useNavigate } from "react-router-dom";
 import Pets from "./MyPets";
-import PostList from "../dashboard/Postlist";
+import PostList from "./MyPosts";
 
 interface Friend {
   id: number;

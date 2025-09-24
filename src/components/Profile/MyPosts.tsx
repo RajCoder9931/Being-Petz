@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { BiRepost } from "react-icons/bi";
 
-// Interfaces
+// Parent interface
 interface User {
   id: number;
   first_name: string;
@@ -10,6 +11,7 @@ interface User {
   profile: string | null;
 }
 
+// Comment interface
 interface Comment {
   id: number;
   post_id: number;
@@ -33,19 +35,7 @@ interface AddCommentResponse {
   comment: Comment;
 }
 
-interface LikeResponse {
-  status: boolean;
-  message: string;
-  likes_count: number;
-  is_liked: boolean; // Added to response
-}
-
-interface RepostResponse {
-  status: boolean;
-  message: string;
-}
-
-interface ReportResponse {
+interface DeletePostResponse {
   status: boolean;
   message: string;
 }
@@ -57,20 +47,17 @@ interface Parent {
   profile: string;
 }
 
+// Post interface - reposts_count पहले से ही है
 interface Post {
   id: number;
   parent_id: number;
   content: string;
   featured_image: string | null;
-  featured_video: string | null;
   created_at_human: string;
   parent: Parent;
   likes_count: number;
   comments_count: number;
-  shares_count: number;
-  reposts_count: number;
-  is_liked: boolean; // To track if current user liked the post
-  repost: any;
+  reposts_count: number; // यह पहले से मौजूद है
 }
 
 interface ApiResponse {
@@ -81,7 +68,7 @@ interface ApiResponse {
   };
 }
 
-const SocialFeed: React.FC = () => {
+const MyPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const [loading, setLoading] = useState<boolean>(true);
@@ -91,30 +78,41 @@ const SocialFeed: React.FC = () => {
   const [submittingComment, setSubmittingComment] = useState<{ [postId: number]: boolean }>({});
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
-  const [likingPost, setLikingPost] = useState<number | null>(null);
-  const [repostingPost, setRepostingPost] = useState<number | null>(null);
-  const [reportingPost, setReportingPost] = useState<number | null>(null);
+  const [deletingPost, setDeletingPost] = useState<number | null>(null);
+  const [sharingPost, setSharingPost] = useState<number | null>(null);
 
   useEffect(() => {
-    // Get current user from localStorage
+    // when the user is login in the localstorage
     const user = localStorage.getItem("user");
     if (user) {
-      const parsedUser = JSON.parse(user);
-      setCurrentUser(parsedUser);
-      
-      // Load liked posts from localStorage
-      const likedPosts = localStorage.getItem(`likedPosts_${parsedUser.id}`);
-      if (likedPosts) {
-        // We'll use this to set initial like status after fetching posts
-      }
+      setCurrentUser(JSON.parse(user));
     }
   }, []);
 
   useEffect(() => {
-    const fetchAllPosts = async () => {
+    const fetchPosts = async () => {
       try {
-        const res = await axios.get<ApiResponse>(
-          "https://argosmob.com/being-petz/public/api/v1/post/all",
+        const user = localStorage.getItem("user");
+        if (!user) {
+          console.error("User not found in localStorage");
+          setLoading(false);
+          return;
+        }
+
+        const parsedUser = JSON.parse(user);
+        const userId: number = parsedUser?.id;
+
+        if (!userId) {
+          console.error("User ID not found");
+          setLoading(false);
+          return;
+        }
+
+        const res = await axios.post<ApiResponse>(
+          "https://argosmob.com/being-petz/public/api/v1/post/get/my",
+          {
+            parent_id: userId
+          },
           {
             headers: {
               'Content-Type': 'application/json',
@@ -123,18 +121,7 @@ const SocialFeed: React.FC = () => {
         );
 
         if (res.data.status && res.data.data) {
-          let postsData = res.data.data.data || [];
-          
-          // Enhance posts with like status from localStorage
-          if (currentUser) {
-            const likedPosts = JSON.parse(localStorage.getItem(`likedPosts_${currentUser.id}`) || '{}');
-            postsData = postsData.map(post => ({
-              ...post,
-              is_liked: likedPosts[post.id] || false
-            }));
-          }
-          
-          setPosts(postsData);
+          setPosts(res.data.data.data || []);
         } else {
           setPosts([]);
         }
@@ -146,17 +133,8 @@ const SocialFeed: React.FC = () => {
       }
     };
 
-    fetchAllPosts();
-  }, [currentUser]);
-
-  // Save liked posts to localStorage
-  const saveLikedPostsToStorage = (postId: number, isLiked: boolean) => {
-    if (!currentUser) return;
-    
-    const likedPosts = JSON.parse(localStorage.getItem(`likedPosts_${currentUser.id}`) || '{}');
-    likedPosts[postId] = isLiked;
-    localStorage.setItem(`likedPosts_${currentUser.id}`, JSON.stringify(likedPosts));
-  };
+    fetchPosts();
+  }, []);
 
   // Fetch comments for a specific post
   const fetchComments = async (postId: number) => {
@@ -164,7 +142,7 @@ const SocialFeed: React.FC = () => {
 
     try {
       const res = await axios.post<CommentApiResponse>(
-        "https://argosmob.uk/being-petz/public/api/v1/post/get-comment",
+        "https://argosmob.com/being-petz/public/api/v1/post/get-comment",
         {
           post_id: postId
         },
@@ -231,74 +209,18 @@ const SocialFeed: React.FC = () => {
     }
   };
 
-  // Like/Unlike post
-  const toggleLike = async (postId: number) => {
-    if (!currentUser) return;
-
-    setLikingPost(postId);
-
-    try {
-      const res = await axios.post<LikeResponse>(
-        "https://argosmob.com/being-petz/public/api/v1/post/like",
-        {
-          post_id: postId,
-          parent_id: currentUser.id
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
-      );
-
-      if (res.data.status) {
-        const newLikeStatus = !posts.find(p => p.id === postId)?.is_liked;
-        
-        // Update post like status and count
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { 
-                ...post, 
-                likes_count: res.data.likes_count,
-                is_liked: newLikeStatus
-              }
-            : post
-        ));
-
-        // Save to localStorage for persistence
-        saveLikedPostsToStorage(postId, newLikeStatus);
-
-        // Show appropriate message
-        if (newLikeStatus) {
-          // alert('Post liked!');
-        } else {
-          // alert('Post unliked!');
-        }
-      }
-    } catch (err) {
-      console.error(`Error liking post ${postId}:`, err);
-      alert('Error liking post. Please try again.');
-    } finally {
-      setLikingPost(null);
-    }
-  };
-
-  // Repost a post (only for friend's posts, not own posts)
-  const repost = async (postId: number) => {
-    if (!currentUser) return;
-
-    // Check if this is user's own post
-    const post = posts.find(p => p.id === postId);
-    if (post && post.parent_id === currentUser.id) {
-      alert("You cannot repost your own post!");
+  // Share post function
+  const sharePost = async (postId: number) => {
+    if (!currentUser) {
+      alert('Please login to share posts');
       return;
     }
 
-    setRepostingPost(postId);
+    setSharingPost(postId);
 
     try {
-      const res = await axios.post<RepostResponse>(
-        "https://argosmob.com/being-petz/public/api/v1/post/re-post",
+      const res = await axios.post(
+        "https://argosmob.com/being-petz/public/api/v1/post/share",
         {
           post_id: postId,
           parent_id: currentUser.id
@@ -311,53 +233,37 @@ const SocialFeed: React.FC = () => {
       );
 
       if (res.data.status) {
-        alert('Post reposted successfully!');
-        // Refresh posts to get updated repost count
-        const refreshRes = await axios.get<ApiResponse>(
-          "https://argosmob.com/being-petz/public/api/v1/post/all"
-        );
-        if (refreshRes.data.status && refreshRes.data.data) {
-          let postsData = refreshRes.data.data.data || [];
-          
-          // Maintain like status from localStorage
-          if (currentUser) {
-            const likedPosts = JSON.parse(localStorage.getItem(`likedPosts_${currentUser.id}`) || '{}');
-            postsData = postsData.map(post => ({
-              ...post,
-              is_liked: likedPosts[post.id] || false
-            }));
-          }
-          
-          setPosts(postsData);
-        }
+        // Update share count in state
+        setPosts(prev => prev.map(post => 
+          post.id === postId 
+            ? { ...post, reposts_count: post.reposts_count + 1 }
+            : post
+        ));
+        alert('Post shared successfully!');
       } else {
-        alert('Failed to repost. Please try again.');
+        alert(res.data.message || 'Failed to share post.');
       }
     } catch (err) {
-      console.error(`Error reposting post ${postId}:`, err);
-      alert('Error reposting post. Please try again.');
+      console.error(`Error sharing post ${postId}:`, err);
+      alert('Error sharing post. Please try again.');
     } finally {
-      setRepostingPost(null);
+      setSharingPost(null);
     }
   };
 
-  // Report a post
-  const reportPost = async (postId: number) => {
-    if (!currentUser) return;
+  // Delete post
+  const deletePost = async (postId: number) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
 
-    const reason = prompt("Please enter the reason for reporting this post:");
-    if (!reason) return;
-
-    setReportingPost(postId);
+    setDeletingPost(postId);
 
     try {
-      const res = await axios.post<ReportResponse>(
-        "https://argosmob.uk/being-petz/public/api/v1/report/add",
+      const res = await axios.post<DeletePostResponse>(
+        "https://argosmob.uk/being-petz/public/api/v1/post/delete",
         {
-          post_id: postId,
-          parent_id: currentUser.id,
-          reason: reason,
-          type: 'post'
+          post_id: postId
         },
         {
           headers: {
@@ -367,15 +273,17 @@ const SocialFeed: React.FC = () => {
       );
 
       if (res.data.status) {
-        alert('Post reported successfully!');
+        // Remove post from state
+        setPosts(prev => prev.filter(post => post.id !== postId));
+        alert('Post deleted successfully!');
       } else {
-        alert('Failed to report post. Please try again.');
+        alert('Failed to delete post. Please try again.');
       }
     } catch (err) {
-      console.error(`Error reporting post ${postId}:`, err);
-      alert('Error reporting post. Please try again.');
+      console.error(`Error deleting post ${postId}:`, err);
+      alert('Error deleting post. Please try again.');
     } finally {
-      setReportingPost(null);
+      setDeletingPost(null);
       setMenuOpen(null);
     }
   };
@@ -391,8 +299,7 @@ const SocialFeed: React.FC = () => {
   };
 
   // Toggle menu visibility
-  const toggleMenu = (postId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleMenu = (postId: number) => {
     if (menuOpen === postId) {
       setMenuOpen(null);
     } else {
@@ -428,24 +335,11 @@ const SocialFeed: React.FC = () => {
     };
   }, []);
 
-  // Get file type from URL
-  const getFileType = (url: string) => {
-    if (!url) return null;
-    const extension = url.split('.').pop()?.toLowerCase();
-    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(extension || '')) {
-      return 'video';
-    }
-    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension || '')) {
-      return 'image';
-    }
-    return null;
-  };
-
   if (loading) return <p className="p-4">Loading posts...</p>;
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Social Feed</h2>
+      <h2 className="text-xl font-bold mb-4">My Posts</h2>
 
       {posts.length === 0 ? (
         <p className="text-gray-500 text-center">No posts found</p>
@@ -455,10 +349,13 @@ const SocialFeed: React.FC = () => {
             key={post.id}
             className="bg-white rounded-xl shadow-md p-4 mb-4 relative"
           >
-            {/* Three-dot Menu for Report */}
+            {/* Three-dot Menu */}
             <div className="absolute top-4 right-4">
               <button
-                onClick={(e) => toggleMenu(post.id, e)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMenu(post.id);
+                }}
                 className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                 title="More options"
               >
@@ -471,24 +368,24 @@ const SocialFeed: React.FC = () => {
               {menuOpen === post.id && (
                 <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg border z-10">
                   <button
-                    onClick={() => reportPost(post.id)}
-                    disabled={reportingPost === post.id}
+                    onClick={() => deletePost(post.id)}
+                    disabled={deletingPost === post.id}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center disabled:opacity-50"
                   >
-                    {reportingPost === post.id ? (
+                    {deletingPost === post.id ? (
                       <>
                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Reporting...
+                        Deleting...
                       </>
                     ) : (
                       <>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        Report Post
+                        Delete Post
                       </>
                     )}
                   </button>
@@ -509,9 +406,6 @@ const SocialFeed: React.FC = () => {
               <div>
                 <p className="font-semibold">
                   {post.parent.first_name} {post.parent.last_name}
-                  {post.parent_id === currentUser?.id && (
-                    <span className="text-blue-500 text-xs ml-1">(You)</span>
-                  )}
                 </p>
                 <p className="text-gray-500 text-sm">{post.created_at_human}</p>
               </div>
@@ -520,122 +414,52 @@ const SocialFeed: React.FC = () => {
             {/* Post Content */}
             <p className="mb-2 whitespace-pre-wrap">{post.content}</p>
 
-            {/* Media Section - Supports both Image and Video */}
-            {(post.featured_image || post.featured_video) && (
-              <div className="mb-2">
-                {post.featured_video ? (
-                  <div className="relative">
-                    <video 
-                      controls 
-                      className="rounded-lg w-full max-h-96 object-cover"
-                      poster={post.featured_image ? `https://argosmob.com/being-petz/public/${post.featured_image}` : undefined}
-                    >
-                      <source 
-                        src={`https://argosmob.com/being-petz/public/${post.featured_video}`} 
-                        type="video/mp4" 
-                      />
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                ) : post.featured_image ? (
-                  <img
-                    src={`https://argosmob.com/being-petz/public/${post.featured_image}`}
-                    alt="Post"
-                    className="rounded-lg w-full mb-2 max-h-96 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : null}
-              </div>
+            {post.featured_image && (
+              <img
+                src={`https://argosmob.com/being-petz/public/${post.featured_image}`}
+                alt="Post"
+                className="rounded-lg w-full mb-2 max-h-96 object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             )}
 
-            {/* Alternative: Check if featured_image is actually a video */}
-            {post.featured_image && getFileType(post.featured_image) === 'video' && (
-              <div className="mb-2">
-                <video 
-                  controls 
-                  className="rounded-lg w-full max-h-96 object-cover"
-                >
-                  <source 
-                    src={`https://argosmob.com/being-petz/public/${post.featured_image}`} 
-                    type="video/mp4" 
-                  />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            )}
-
-            {/* Post Stats - Like, Comment, Repost */}
+            {/* Post Stats - WITH Share Section */}
             <div className="flex justify-between text-gray-600 text-sm mt-3 pt-2 border-t">
-              {/* Like Button */}
-              <button
-                onClick={() => toggleLike(post.id)}
-                disabled={likingPost === post.id}
-                className={`flex items-center transition-colors ${
-                  post.is_liked ? 'text-red-500 font-semibold' : 'text-gray-600 hover:text-red-500'
-                }`}
-              >
-                {likingPost === post.id ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {post.is_liked ? 'Liking...' : 'Unliking...'}
-                  </>
-                ) : post.is_liked ? (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                    </svg>
-                    Liked ({post.likes_count})
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    Like ({post.likes_count})
-                  </>
-                )}
-              </button>
-
-              {/* Comment Button */}
+              <span className="flex items-center">
+                👍 {post.likes_count} Likes
+              </span>
               <button
                 onClick={() => toggleComments(post.id)}
                 className="flex items-center text-blue-500 hover:text-blue-700 transition-colors"
               >
                 💬 {post.comments_count} Comments
               </button>
+              <button
+                onClick={() => sharePost(post.id)}
+                disabled={sharingPost === post.id}
+                className={`flex items-center transition-colors ${
+                  sharingPost === post.id ? 'text-gray-400' : 'text-green-500 hover:text-green-700'
+                }`}
+                title="Share Post"
+              >
+                {sharingPost === post.id ? (
+                  <svg className="animate-spin -ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                    <BiRepost />
 
-              {/* Repost Button (only show for friend's posts) */}
-              {post.parent_id !== currentUser?.id && (
-                <button
-                  onClick={() => repost(post.id)}
-                  disabled={repostingPost === post.id}
-                  className={`flex items-center transition-colors ${
-                    repostingPost === post.id ? 'text-gray-400' : 'text-gray-600 hover:text-green-500'
-                  }`}
-                >
-                  {repostingPost === post.id ? (
-                    <svg className="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                  {post.reposts_count || 0} Repost
-                </button>
-              )}
+                )}
+                {post.reposts_count} Repost
+              </button>
             </div>
 
-            {/* Comments Section */}
+            {/* Comments Section - Always visible comment input */}
             <div className="mt-3">
-              {/* Add Comment Form */}
+              {/* Add Comment Form - Always visible */}
               {currentUser && (
                 <div className="mb-2">
                   <div className="flex space-x-2">
@@ -675,7 +499,7 @@ const SocialFeed: React.FC = () => {
                 </div>
               )}
 
-              {/* Comments List */}
+              {/* Comments List - Show only when comments are clicked */}
               {expandedPost === post.id && (
                 <div className="mt-2 border-t pt-2">
                   {loadingComments[post.id] ? (
@@ -725,4 +549,4 @@ const SocialFeed: React.FC = () => {
   );
 };
 
-export default SocialFeed;
+export default MyPosts;

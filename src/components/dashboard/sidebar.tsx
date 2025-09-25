@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Home,
   User,
@@ -8,11 +8,11 @@ import {
   Newspaper,
   Calendar,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }
 
 const menuItems = [
@@ -22,47 +22,64 @@ const menuItems = [
   { name: "Chats", icon: MessageSquare, path: "/chats" },
   { name: "All Services", icon: Wrench, path: "/services" },
   { name: "Blog", icon: Newspaper, path: "/blog" },
-  // { name: "Contest", icon: Newspaper, path: "/contest" },
   { name: "Events", icon: Calendar, path: "/events" },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen: externalIsOpen, onToggle }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const location = useLocation();
+  const actualIsOpen = externalIsOpen !== undefined ? externalIsOpen : isOpen;
+
+   useEffect(() => {
+    if (window.innerWidth > 768 && !actualIsOpen) {
+      const newState = true;
+      if (onToggle) {
+        onToggle(newState);
+      } else {
+        setIsOpen(newState);
+      }
+    }
+  }, [location.pathname]);
+
   return (
     <div className="flex">
       {/* Sidebar */}
       <aside
-        className={`fixed top-14 left-0 h-[calc(100%-4rem)] w-64 text-white z-50 transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        className={`fixed top-14 left-0 h-[calc(100%-4rem)] text-white z-40 transform transition-all duration-300 ease-in-out
+          ${actualIsOpen ? "w-64 translate-x-0" : "w-16 -translate-x-0"}
         `}
         style={{ backgroundColor: "#8337B2" }}
       >
-        <nav className="mt-4 space-y-2">
+        <nav className="mt-8 space-y-2 px-2">
           {menuItems.map(({ name, icon: Icon, path }) => (
             <NavLink
               key={name}
               to={path}
               className={({ isActive }) =>
-                `group flex items-center gap-3 px-4 py-1.5 rounded-md font-medium transition-all duration-300 ease-in-out ${
+                `group flex items-center gap-3 px-3 py-2.5 rounded-md font-medium transition-all duration-300 ease-in-out ${
                   isActive
                     ? "bg-white text-[#8337B2]"
                     : "hover:bg-white hover:text-[#8337B2]"
-                }`
+                } ${!actualIsOpen ? "justify-center" : ""}`
               }
-              onClick={onClose}
+              title={!actualIsOpen ? name : ""}
             >
               <Icon
                 size={20}
-                className="transition-colors duration-300 ease-in-out group-hover:text-[#8337B2]"
+                className="transition-colors duration-300 ease-in-out group-hover:text-[#8337B2] flex-shrink-0"
               />
-              <span>{name}</span>
+              <span className={`transition-all duration-300 ${actualIsOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+                {name}
+              </span>
             </NavLink>
           ))}
         </nav>
       </aside>
-              {/* Shift the content when a open a sidebar */}
+      
+      {/* Content area with the  dynamic margin */}
       <div
         className={`flex-1 transition-all duration-300 ease-in-out ${
-          isOpen ? "ml-64" : "ml-0"
+          actualIsOpen ? "ml-64" : "ml-16"
         }`}
       >
       </div>

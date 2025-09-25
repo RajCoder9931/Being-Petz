@@ -14,6 +14,9 @@ const Petprofile: React.FC = () => {
   const [pets, setPets] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // नया state filter के लिए
+  const [activeFilter, setActiveFilter] = useState<"all" | "vaccination" | "grooming" | "deworming" | "meal" | "weight">("all");
+
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   useEffect(() => {
@@ -54,7 +57,7 @@ const Petprofile: React.FC = () => {
         .then((res) => {
           if (res.data && res.data.data) {
             setPets(res.data.data);
-            setSelectedPet(res.data.data[0]); // default first pet
+            setSelectedPet(res.data.data[0]);  
           }
         })
         .catch((err) => {
@@ -63,8 +66,6 @@ const Petprofile: React.FC = () => {
     }
   }, [user]);
 
-
-
   // vaccination details
   const [vaccineRecords, setVaccineRecords] = useState<any[]>([]);
   const [dewormingRecords, setDewormingRecords] = useState<any[]>([]);
@@ -72,9 +73,7 @@ const Petprofile: React.FC = () => {
   const [mealRecords, setMealRecords] = useState<any[]>([]);
   const [weightRecords, setWeightRecords] = useState<any[]>([]);
 
-
-  // // Fetch vaccine records when selectedPet changes
-
+  // Fetch vaccine records when selectedPet changes
   useEffect(() => {
     if (selectedPet?.id) {
       // Vaccines
@@ -153,6 +152,7 @@ const Petprofile: React.FC = () => {
 
     return timeLeft;
   };
+
   // reminder
   const [vaccination, setVaccination] = useState<any>(null);
   const [deworming, setDeworming] = useState<any>(null);
@@ -294,6 +294,30 @@ const Petprofile: React.FC = () => {
       alert("Something went wrong while updating pet.");
     }
   };
+
+  // Filter function
+  const filterRecords = () => {
+    if (activeFilter === "all") {
+      return {
+        showVaccination: true,
+        showDeworming: true,
+        showGrooming: true,
+        showMeal: true,
+        showWeight: true
+      };
+    }
+    
+    return {
+      showVaccination: activeFilter === "vaccination",
+      showDeworming: activeFilter === "deworming",
+      showGrooming: activeFilter === "grooming",
+      showMeal: activeFilter === "meal",
+      showWeight: activeFilter === "weight"
+    };
+  };
+
+  const { showVaccination, showDeworming, showGrooming, showMeal, showWeight } = filterRecords();
+
   // 🔹 Top of component
   const vaccinationCountdown = useCountdown(
     vaccination?.reminder_date ?? null,
@@ -310,9 +334,6 @@ const Petprofile: React.FC = () => {
     grooming?.reminder_time ?? null
   );
 
-
-
-
   return (
     <div className="flex min-h-screen bg-gray-50 pt-12">
       {/*   Sidebar */}
@@ -327,13 +348,13 @@ const Petprofile: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-8xl mx-auto items-start">
 
             {/* Combined Left Column */}
-            <div className="space-y-4 pr-4 md:pr-6 lg:pr-8 h-fit w-full">
+            <div className="space-y-4 pr-4 md:pr-6 lg:pr-8 w-full">
 
-              {/* Reminder Section */}
-              <div className="bg-white text-gray-800 rounded-2xl shadow-md p-4">
+              {/* Reminder Section - Fixed Height */}
+              <div className="bg-white text-gray-800 rounded-2xl shadow-md p-4 h-64 flex flex-col">
                 <div className="flex items-center space-x-2 text-sm font-medium text-purple-600 bg-purple-100 rounded-lg px-3 py-2 shadow-sm shadow-purple-200">
                   <span className="text-lg">🐾</span>
-                  <p>
+                  <p className="truncate">
                     Upcoming:{" "}
                     <span className="text-gray-800">
                       {groomingRecords.length > 0
@@ -361,7 +382,7 @@ const Petprofile: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="mt-3 flex items-center gap-4">
+                <div className="mt-3 flex items-center gap-4 flex-1">
                   <div className="rounded-xl overflow-hidden flex-shrink-0">
                     <img
                       src={selectedPet?.avatar
@@ -373,8 +394,8 @@ const Petprofile: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-600 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-600 mb-2 truncate">
                       <span className="font-semibold text-gray-800">{selectedPet?.name || "Your pet"}</span> has an upcoming grooming session!
                     </p>
 
@@ -393,7 +414,7 @@ const Petprofile: React.FC = () => {
 
                       return upcomingGrooming ? (
                         <div className="bg-blue-50 p-2 rounded-lg">
-                          <p className="text-xs font-medium text-blue-700">
+                          <p className="text-xs font-medium text-blue-700 truncate">
                             Next: {upcomingGrooming.type} on {new Date(upcomingGrooming.reminder_date).toLocaleDateString()}
                           </p>
                           <p className="text-xs text-blue-600">
@@ -405,17 +426,18 @@ const Petprofile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-gray-100">
-                  <p className="text-xs text-gray-500">
+                <div className="mt-auto pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 truncate">
                     🐾 Don't forget to prepare everything needed for the grooming session!
                   </p>
                 </div>
               </div>
-              {/* Vaccination Reminder Section */}
-              <div className="bg-white text-gray-800 rounded-2xl shadow-md p-4 mt-4">
+
+              {/* Vaccination Reminder Section - Fixed Height */}
+              <div className="bg-white text-gray-800 rounded-2xl shadow-md p-4 h-64 flex flex-col">
                 <div className="flex items-center space-x-2 text-sm font-medium text-green-600 bg-green-100 rounded-lg px-3 py-2 shadow-sm shadow-green-200">
                   <span className="text-lg">💉</span>
-                  <p>
+                  <p className="truncate">
                     Vaccination:{" "}
                     <span className="text-gray-800">
                       {vaccineRecords.length > 0
@@ -443,7 +465,7 @@ const Petprofile: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="mt-3 flex items-center gap-4">
+                <div className="mt-3 flex items-center gap-4 flex-1">
                   <div className="rounded-xl overflow-hidden flex-shrink-0">
                     <img
                       src={selectedPet?.avatar
@@ -455,8 +477,8 @@ const Petprofile: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-600 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-600 mb-2 truncate">
                       <span className="font-semibold text-gray-800">{selectedPet?.name || "Your pet"}</span> has an upcoming vaccination!
                     </p>
 
@@ -475,10 +497,10 @@ const Petprofile: React.FC = () => {
 
                       return upcomingVaccine ? (
                         <div className="bg-green-50 p-2 rounded-lg">
-                          <p className="text-xs font-medium text-green-700">
+                          <p className="text-xs font-medium text-green-700 truncate">
                             Next: {upcomingVaccine.vaccine_name || 'Vaccination'} on {new Date(upcomingVaccine.reminder_date).toLocaleDateString()}
                           </p>
-                          <p className="text-xs text-green-600">
+                          <p className="text-xs text-green-600 truncate">
                             Type: {upcomingVaccine.type || 'Not specified'}
                           </p>
                           <p className="text-xs text-green-600">
@@ -490,20 +512,20 @@ const Petprofile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-gray-100">
-                  <p className="text-xs text-gray-500">
+                <div className="mt-auto pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 truncate">
                     💉 Keep your pet's vaccinations up to date for their health and safety!
                   </p>
                 </div>
               </div>
 
-              {/* Sponsored Card */}
-              <div className="relative bg-gradient-to-r from-orange-200 via-yellow-100 to-teal-100 rounded-2xl shadow-md overflow-hidden">
-                <span className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded-full">
+              {/* Sponsored Card - Fixed Height */}
+              <div className="relative bg-gradient-to-r from-orange-200 via-yellow-100 to-teal-100 rounded-2xl shadow-md overflow-hidden h-64 flex flex-col">
+                <span className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded-full z-10">
                   Sponsored !
                 </span>
 
-                <div className="flex items-center p-5 min-h-[200px]">
+                <div className="flex items-center p-5 flex-1">
                   <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
                     <img
                       src="https://png.pngtree.com/png-clipart/20231002/original/pngtree-cute-cartoon-cat-png-image_13060428.png"
@@ -512,16 +534,16 @@ const Petprofile: React.FC = () => {
                     />
                   </div>
 
-                  <div className="ml-5 flex-1 flex flex-col justify-between h-full">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">PURR-FECT REST!</h3>
-                      <p className="text-base text-gray-600">
+                  <div className="ml-5 flex-1 flex flex-col justify-between h-full min-w-0">
+                    <div className="min-w-0">
+                      <h3 className="text-xl font-bold text-gray-800 truncate">PURR-FECT REST!</h3>
+                      <p className="text-base text-gray-600 truncate">
                         Luxury Beds for Dreamy Naps
                       </p>
                     </div>
 
                     <div className="mt-4">
-                      <button className="w-50% bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold text-base shadow-md hover:opacity-90 transition">
+                      <button className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold text-base shadow-md hover:opacity-90 transition truncate">
                         Shop Comfort 🐾
                       </button>
                     </div>
@@ -529,22 +551,22 @@ const Petprofile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Birthday Card */}
-              <div className="relative bg-gradient-to-r from-pink-200 via-pink-100 to-purple-200 rounded-2xl shadow-md overflow-hidden">
+              {/* Birthday Card - Fixed Height */}
+              <div className="relative bg-gradient-to-r from-pink-200 via-pink-100 to-purple-200 rounded-2xl shadow-md overflow-hidden h-64 flex flex-col">
                 <button
                   onClick={() => setShowList(!showList)}
-                  className="absolute top-2 right-2 bg-pink-600 text-white text-xs px-3 py-1 rounded-full hover:bg-pink-700 transition"
+                  className="absolute top-2 right-2 bg-pink-600 text-white text-xs px-3 py-1 rounded-full hover:bg-pink-700 transition z-10"
                 >
                   🎉 {friends.length} Birthdays
                 </button>
 
                 {showList && (
-                  <div className="absolute right-2 top-10 bg-white shadow-md rounded-lg w-40 z-10">
+                  <div className="absolute right-2 top-10 bg-white shadow-md rounded-lg w-40 z-20 max-h-32 overflow-y-auto">
                     <ul className="divide-y divide-gray-200">
                       {friends.map((f) => (
                         <li
                           key={f.id}
-                          className="px-3 py-2 text-sm text-gray-800 hover:bg-pink-100 cursor-pointer"
+                          className="px-3 py-2 text-sm text-gray-800 hover:bg-pink-100 cursor-pointer truncate"
                           onClick={() => {
                             setSelectedFriend(f);
                             setShowList(false);
@@ -557,7 +579,7 @@ const Petprofile: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex items-center p-5 min-h-[200px]">
+                <div className="flex items-center p-5 flex-1">
                   <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
                     <img
                       src={selectedFriend.image}
@@ -566,12 +588,12 @@ const Petprofile: React.FC = () => {
                     />
                   </div>
 
-                  <div className="ml-5 flex-1 flex flex-col justify-between h-full">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">
-                        🎂 {selectedFriend.name}’s Birthday!
+                  <div className="ml-5 flex-1 flex flex-col justify-between h-full min-w-0">
+                    <div className="min-w-0">
+                      <h3 className="text-xl font-bold text-gray-800 truncate">
+                        🎂 {selectedFriend.name}'s Birthday!
                       </h3>
-                      <p className="text-base text-gray-600">
+                      <p className="text-base text-gray-600 truncate">
                         Coming up on{" "}
                         <span className="font-semibold text-gray-800">{selectedFriend.date}</span>
                       </p>
@@ -580,9 +602,9 @@ const Petprofile: React.FC = () => {
                     <div className="mt-4">
                       <button
                         onClick={() =>
-                          alert(`🎉 You’ve sent wishes to ${selectedFriend.name}! 🐾`)
+                          alert(`🎉 You've sent wishes to ${selectedFriend.name}! 🐾`)
                         }
-                        className="w-50% bg-gradient-to-r from-pink-500 to-rose-600 text-white px-5 py-2.5 rounded-full font-semibold text-base shadow-md hover:opacity-90 transition"
+                        className="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white px-5 py-2.5 rounded-full font-semibold text-base shadow-md hover:opacity-90 transition truncate"
                       >
                         Send Wishes 🎁
                       </button>
@@ -680,6 +702,70 @@ const Petprofile: React.FC = () => {
                       <span>🐾 {selectedPet.type}</span>
                       <span>🐕 {selectedPet.breed}</span>
                     </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-3 sm:flex justify-center flex-wrap gap-2 px-4 pb-4 mt-2">
+                    <button 
+                      onClick={() => setActiveFilter("all")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                        activeFilter === "all" 
+                          ? "bg-gray-700 text-white" 
+                          : "bg-gray-600 text-white hover:bg-gray-700"
+                      }`}
+                    >
+                      🔄 All
+                    </button>
+                    <button 
+                      onClick={() => setActiveFilter("vaccination")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                        activeFilter === "vaccination" 
+                          ? "bg-green-600 text-white" 
+                          : "bg-green-500 text-white hover:bg-green-600"
+                      }`}
+                    >
+                      🩺 Vaccination
+                    </button>
+                    <button 
+                      onClick={() => setActiveFilter("grooming")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                        activeFilter === "grooming" 
+                          ? "bg-blue-600 text-white" 
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                    >
+                      ✂️ Grooming
+                    </button>
+                    <button 
+                      onClick={() => setActiveFilter("deworming")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                        activeFilter === "deworming" 
+                          ? "bg-yellow-600 text-white" 
+                          : "bg-yellow-500 text-white hover:bg-yellow-600"
+                      }`}
+                    >
+                      💊 Deworming
+                    </button>
+                    <button 
+                      onClick={() => setActiveFilter("meal")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                        activeFilter === "meal" 
+                          ? "bg-pink-600 text-white" 
+                          : "bg-pink-500 text-white hover:bg-pink-600"
+                      }`}
+                    >
+                      🍖 Meal
+                    </button>
+                    <button 
+                      onClick={() => setActiveFilter("weight")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                        activeFilter === "weight" 
+                          ? "bg-purple-600 text-white" 
+                          : "bg-purple-500 text-white hover:bg-purple-600"
+                      }`}
+                    >
+                      ⚖️ Weight
+                    </button>
                   </div>
                 </div>
               )}
@@ -863,144 +949,174 @@ const Petprofile: React.FC = () => {
                             </div>
                           </div>
                         </div>
-
-
                       </div>
                     )}
-
-
-
 
                     {/* Records Tab */}
                     {activeTab === "records" && (
                       <div className="bg-pink-100 p-4 rounded-lg w-full space-y-6">
-                        {/* Vaccination Records */}
-                        <div>
-                          <h2 className="text-lg font-bold mb-4">
-                            Vaccinations for {selectedPet?.name || "Pet"}
+                        {/* Active Filter Indicator */}
+                        <div className="flex justify-between items-center mb-4">
+                          <h2 className="text-xl font-bold">
+                            {activeFilter === "all" 
+                              ? "All Records" 
+                              : `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Records`
+                            } for {selectedPet?.name || "Pet"}
                           </h2>
-                          {vaccineRecords.length > 0 ? (
-                            vaccineRecords.map((record, idx) => (
-                              <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
-                                <img
-                                  src={`https://argosmob.com/being-petz/public/${record.image_path}`}
-                                  alt={record.vaccine_name}
-                                  className="w-28 h-28 rounded-lg object-cover"
-                                />
-                                <div
-                                  className="flex flex-col justify-center rounded-md p-4 w-full"
-                                  style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
-                                >
-                                  <h3 className="font-bold text-purple-700">{record.vaccine_name}</h3>
-                                  <p className="text-xs">Type: {record.type}</p>
-                                  <p className="text-xs">Date: {record.date}</p>
-                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
-                                  {record.next_vaccine && (
-                                    <p className="text-xs text-blue-600 font-semibold">
-                                      Next Vaccine: {record.next_vaccine}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-gray-600 text-center">No vaccination records found.</p>
+                          {activeFilter !== "all" && (
+                            <button 
+                              onClick={() => setActiveFilter("all")}
+                              className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                            >
+                              Show All Records
+                            </button>
                           )}
                         </div>
 
-                        {/* Deworming Records */}
-                        <div>
-                          <h2 className="text-lg font-bold mb-4">Deworming Records</h2>
-                          {dewormingRecords.length > 0 ? (
-                            dewormingRecords.map((record, idx) => (
-                              <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
-                                <img
-                                  src={`https://argosmob.com/being-petz/public/${record.image_path}`}
-                                  alt={record.type}
-                                  className="w-28 h-28 rounded-lg object-cover"
-                                />
-                                <div className="flex flex-col justify-center rounded-md p-4 w-full bg-green-50">
-                                  <h3 className="font-bold text-green-700">Type: {record.type}</h3>
-                                  <p className="text-xs">Date: {record.date}</p>
-                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                        {/* Vaccination Records - Conditional Render */}
+                        {showVaccination && (
+                          <div>
+                            <h2 className="text-lg font-bold mb-4">Vaccinations</h2>
+                            {vaccineRecords.length > 0 ? (
+                              vaccineRecords.map((record, idx) => (
+                                <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
+                                  <img
+                                    src={`https://argosmob.com/being-petz/public/${record.image_path}`}
+                                    alt={record.vaccine_name}
+                                    className="w-28 h-28 rounded-lg object-cover"
+                                  />
+                                  <div
+                                    className="flex flex-col justify-center rounded-md p-4 w-full"
+                                    style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
+                                  >
+                                    <h3 className="font-bold text-purple-700">{record.vaccine_name}</h3>
+                                    <p className="text-xs">Type: {record.type}</p>
+                                    <p className="text-xs">Date: {record.date}</p>
+                                    <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                    {record.next_vaccine && (
+                                      <p className="text-xs text-blue-600 font-semibold">
+                                        Next Vaccine: {record.next_vaccine}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-gray-600 text-center">No deworming records found.</p>
-                          )}
-                        </div>
+                              ))
+                            ) : (
+                              <p className="text-gray-600 text-center">No vaccination records found.</p>
+                            )}
+                          </div>
+                        )}
 
-                        {/* Grooming Records */}
-                        <div>
-                          <h2 className="text-lg font-bold mb-4">Grooming Records</h2>
-                          {groomingRecords.length > 0 ? (
-                            groomingRecords.map((record, idx) => (
-                              <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
-                                <img
-                                  src={`https://argosmob.com/being-petz/public/${record.image_path}`}
-                                  alt={record.type}
-                                  className="w-28 h-28 rounded-lg object-cover"
-                                />
-                                <div
-                                  className="flex flex-col justify-center rounded-md p-4 w-full"
-                                  style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
-                                >
-                                  <h3 className="font-bold text-blue-700">Type: {record.type}</h3>
-                                  <p className="text-xs">Date: {record.date}</p>
-                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
-                                  {record.next_grooming && (
-                                    <p className="text-xs text-blue-600 font-semibold">
-                                      Next Grooming: {record.next_grooming}
-                                    </p>
-                                  )}
+                        {/* Deworming Records - Conditional Render */}
+                        {showDeworming && (
+                          <div>
+                            <h2 className="text-lg font-bold mb-4">Deworming Records</h2>
+                            {dewormingRecords.length > 0 ? (
+                              dewormingRecords.map((record, idx) => (
+                                <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
+                                  <img
+                                    src={`https://argosmob.com/being-petz/public/${record.image_path}`}
+                                    alt={record.type}
+                                    className="w-28 h-28 rounded-lg object-cover"
+                                  />
+                                  <div className="flex flex-col justify-center rounded-md p-4 w-full bg-green-50">
+                                    <h3 className="font-bold text-green-700">Type: {record.type}</h3>
+                                    <p className="text-xs">Date: {record.date}</p>
+                                    <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                  </div>
                                 </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-gray-600 text-center">No grooming records found.</p>
-                          )}
-                        </div>
+                              ))
+                            ) : (
+                              <p className="text-gray-600 text-center">No deworming records found.</p>
+                            )}
+                          </div>
+                        )}
 
-                        {/* Meal Records */}
-                        <div>
-                          <h2 className="text-lg font-bold mb-4">Meal Records</h2>
-                          {mealRecords.length > 0 ? (
-                            mealRecords.map((record, idx) => (
-                              <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
-                                <div
-                                  className="rounded-md p-4 w-full"
-                                  style={{ backgroundColor: record.bg_color || "#FFF" }}
-                                >
-                                  <h3 className="font-bold text-orange-700">Meal Time: {record.meal_time}</h3>
-                                  <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                        {/* Grooming Records - Conditional Render */}
+                        {showGrooming && (
+                          <div>
+                            <h2 className="text-lg font-bold mb-4">Grooming Records</h2>
+                            {groomingRecords.length > 0 ? (
+                              groomingRecords.map((record, idx) => (
+                                <div key={idx} className="flex gap-4 bg-white rounded-lg shadow-md p-4 mb-3">
+                                  <img
+                                    src={`https://argosmob.com/being-petz/public/${record.image_path}`}
+                                    alt={record.type}
+                                    className="w-28 h-28 rounded-lg object-cover"
+                                  />
+                                  <div
+                                    className="flex flex-col justify-center rounded-md p-4 w-full"
+                                    style={{ backgroundColor: record.bg_color || "#F1F1F1" }}
+                                  >
+                                    <h3 className="font-bold text-blue-700">Type: {record.type}</h3>
+                                    <p className="text-xs">Date: {record.date}</p>
+                                    <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                    {record.next_grooming && (
+                                      <p className="text-xs text-blue-600 font-semibold">
+                                        Next Grooming: {record.next_grooming}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-gray-600 text-center">No meal records found.</p>
-                          )}
-                        </div>
+                              ))
+                            ) : (
+                              <p className="text-gray-600 text-center">No grooming records found.</p>
+                            )}
+                          </div>
+                        )}
 
-                        {/* Weight Records */}
-                        <div>
-                          <h2 className="text-lg font-bold mb-4">Weight Records</h2>
-                          {weightRecords.length > 0 ? (
-                            weightRecords.map((record, idx) => (
-                              <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
-                                <div
-                                  className="rounded-md p-4 w-full"
-                                  style={{ backgroundColor: record.bg_color || "#EEE" }}
-                                >
-                                  <h3 className="font-bold text-brown-700">Weight: {record.weight} kg</h3>
-                                  <p className="text-xs">Date: {record.date}</p>
+                        {/* Meal Records - Conditional Render */}
+                        {showMeal && (
+                          <div>
+                            <h2 className="text-lg font-bold mb-4">Meal Records</h2>
+                            {mealRecords.length > 0 ? (
+                              mealRecords.map((record, idx) => (
+                                <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
+                                  <div
+                                    className="rounded-md p-4 w-full"
+                                    style={{ backgroundColor: record.bg_color || "#FFF" }}
+                                  >
+                                    <h3 className="font-bold text-orange-700">Meal Time: {record.meal_time}</h3>
+                                    <p className="text-xs">Reminder: {record.reminder_date} at {record.reminder_time}</p>
+                                  </div>
                                 </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-gray-600 text-center">No weight records found.</p>
-                          )}
-                        </div>
+                              ))
+                            ) : (
+                              <p className="text-gray-600 text-center">No meal records found.</p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Weight Records - Conditional Render */}
+                        {showWeight && (
+                          <div>
+                            <h2 className="text-lg font-bold mb-4">Weight Records</h2>
+                            {weightRecords.length > 0 ? (
+                              weightRecords.map((record, idx) => (
+                                <div key={idx} className="bg-white rounded-lg shadow-md p-4 mb-3">
+                                  <div
+                                    className="rounded-md p-4 w-full"
+                                    style={{ backgroundColor: record.bg_color || "#EEE" }}
+                                  >
+                                    <h3 className="font-bold text-brown-700">Weight: {record.weight} kg</h3>
+                                    <p className="text-xs">Date: {record.date}</p>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-gray-600 text-center">No weight records found.</p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* No Records Message - जब कोई record न हो */}
+                        {activeFilter !== "all" && 
+                         !showVaccination && !showDeworming && !showGrooming && !showMeal && !showWeight && (
+                          <div className="text-center py-8">
+                            <p className="text-gray-600 text-lg">No {activeFilter} records found for {selectedPet?.name || "your pet"}</p>
+                          </div>
+                        )}
+
                         {/* Button */}
                         <div className="text-center">
                           <button
@@ -1012,21 +1128,15 @@ const Petprofile: React.FC = () => {
                         </div>
                       </div>
                     )}
-
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   );
 };
 
 export default Petprofile;
-
-

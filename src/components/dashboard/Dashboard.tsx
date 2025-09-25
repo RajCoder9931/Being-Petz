@@ -2,17 +2,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPaw } from "react-icons/fa";
-
+ 
 // Components
 import Header from "./Header";
 import Sidebar from "./sidebar";
-import FriendSuggestions from "./FriendSuggestions";
- import CreatePost from "./CreatePost";
-import PostList from "./Postlist";
+import CreatePost from "./CreatePost";
+import PostList from "./Postcard";
 // Images
 import { PawPrint, CalendarIcon, Home, Heart } from "lucide-react";
 import dogImg from "../../assets/img/cat.jpg"; 
  import adoptPetImg from "../../assets/adopt-img.png";
+ import Contest from '../../assets/contest.png';
 import lostFoundImg from "../../assets/lost-found.png";
 
 const dummyImages = [
@@ -46,6 +46,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(false);
+
+ 
+  const handleViewProfile = () => {
+    navigate('/pet-profile');
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -166,9 +171,12 @@ const Dashboard = () => {
                 {pet.age} Years {pet.gender === "Male" ? "♂ Male" : "♀ Female"}
               </p>
               <div className="flex gap-2 mt-3 justify-center">
-                <button className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600">
-                  Edit Profile
-                </button>
+              <button
+      onClick={handleViewProfile}
+      className="px-3 py-1 text-xs rounded-full bg-purple-500 text-white hover:bg-purple-600"
+    >
+      View Profile
+    </button>
               </div>
             </div>
           ))}
@@ -182,8 +190,7 @@ const Dashboard = () => {
                 <PostList />
 
 
-                <FriendSuggestions/>
-              </div>
+               </div>
 
               {/* RIGHT COLUMN - Now spans 2 columns instead of 1 */}
               <div className="lg:col-span-2 space-y-6">
@@ -193,7 +200,7 @@ const Dashboard = () => {
                   className="relative cursor-pointer rounded-2xl overflow-hidden shadow-lg group"
                 >
                   <img
-                    src="https://www.stonnington.vic.gov.au/files/assets/public/community/arts-and-culture/festival-and-events/pets-in-the-park/pets-in-the-park-2021-a.jpg" 
+                    src={Contest} 
                     alt="Contest"
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
                   />

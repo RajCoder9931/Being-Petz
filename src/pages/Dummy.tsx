@@ -1,274 +1,407 @@
 import { useState, useEffect } from "react";
 import Header from "../components/dashboard/Header";
 import Sidebar from "../components/dashboard/sidebar";
-import CommunityList from "../components/community/CommunityList";
-import CreateCommunityForm from "../components/community/CreateCommunityForm";
-import ChatScreen from "../components/community/ChatScreen";
-import SuggestedCommunities from "../components/community/SuggestedCommunities";
 import axios from "axios";
-import catIcon from "../assets/img/cat.jpg";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-// Define Community type
-type Community = {
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+interface Pet {
   id: number;
   name: string;
-  image?: string;
-  creator?: string;
-  usersCount?: number;
-  message?: string;
-  time?: string;
-  unread?: number;
-  is_member?: boolean;
-};
+  avatar?: string;
+  age: number;
+  gender: string;
+  breed: string;
+}
 
-function CommunityApp() {
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [suggestedCommunities, setSuggestedCommunities] = useState<Community[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [activeChat, setActiveChat] = useState<Community | null>(null);
-  const [selectedCommunityDetails, setSelectedCommunityDetails] = useState<Community | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+interface WeightEntry {
+  date: string;
+  weight: number;
+}
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+const dummyImages = [
+  "https://via.placeholder.com/150",
+  "https://via.placeholder.com/160",
+  "https://via.placeholder.com/170",
+];
 
-  // Fetch communities from API
-  const fetchCommunities = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "https://argosmob.uk/being-petz/public/api/v1/pet/community/get",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+const CareForm = () => {
+  const [activeTab, setActiveTab] = useState<string>("Vaccines");
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
 
-      if (response.data?.data) {
-        const allCommunities = response.data.data;
+  const [vaccineRecords, setVaccineRecords] = useState<any[]>([]);
+  const [dewormingRecords, setDewormingRecords] = useState<any[]>([]);
+  const [groomingRecords, setGroomingRecords] = useState<any[]>([]);
+  const [mealRecords, setMealRecords] = useState<any[]>([]);
+  const [weightHistory, setWeightHistory] = useState<WeightEntry[]>([]);
 
-        // Separate communities user is member of and suggested communities
-        const userCommunities = allCommunities.filter((comm: Community) => comm.is_member);
-        const suggested = allCommunities.filter((comm: Community) => !comm.is_member);
+  const [newWeight, setNewWeight] = useState<string>("");
+  const [vaccine, ] = useState<string>("");
+  const [uploadFile, ] = useState<File | null>(null);
 
-        setCommunities(userCommunities);
-        setSuggestedCommunities(suggested);
-      }
-    } catch (error) {
-      console.error("Failed to fetch communities", error);
-    }
+  const meals = {
+    morning: "Done",
+    evening: "Done",
+    night: "______",
   };
 
-  // Join community function
-  const handleJoinCommunity = async (communityId: number) => {
-    try {
-      const token = localStorage.getItem("token");
-      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-      const userId = userData.id;
+  const tabs = [
+    "Vaccines",
+    "Deworming",
+    "Grooming",
+    "Meals",
+    "Weight",
+    "General",
+  ];
 
-      await axios.post(
-        "https://argosmob.uk/being-petz/public/api/v1/pet/community/join",
-        {
-          user_id: userId,
-          community_id: communityId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Refresh communities after joining
-      fetchCommunities();
-    } catch (error) {
-      console.error("Failed to join community", error);
-    }
-  };
-
+  // Fetch pets
   useEffect(() => {
-    fetchCommunities();
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      fetchPets(parsedUser.id);
+    }
   }, []);
 
-  const handleCreateCommunity = (community: Community) => {
-    setCommunities((prev) => [
-      { ...community, id: Date.now(), time: "Just now", unread: 0, is_member: true },
-      ...prev,
-    ]);
-    setShowForm(false);
+  const fetchPets = async (userId: string | number) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "https://argosmob.com/being-petz/public/api/v1/pet/get/my",
+        { user_id: userId }
+      );
+      setPets(response.data.data || []);
+      if (response.data.data.length > 0) setSelectedPet(response.data.data[0]);
+    } catch (error) {
+      console.error("Error fetching pets:", error);
+      alert("Failed to fetch pets");
+    }
+    setLoading(false);
   };
 
-  const handleSelectCommunity = async (community: Community) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "https://argosmob.uk/being-petz/public/api/v1/pet/community/details",
-        { community_id: community.id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = res.data?.data;
+  // Fetch records whenever selectedPet or activeTab changes
+  useEffect(() => {
+    if (!selectedPet) return;
 
-      if (data) {
-        setSelectedCommunityDetails({
-          id: data.id,
-          name: data.name,
-          image: data.profile ? `https://argosmob.uk/being-petz/public/${data.profile}` : undefined,
-          creator: data.creator ? `${data.creator.first_name} ${data.creator.last_name}` : "Unknown",
-          usersCount: data.users_count || 0,
-        });
-        setActiveChat({
-          id: data.id,
-          name: data.name,
-          message: "",
-          time: "",
-          unread: 0,
-        });
+    const fetchRecords = async () => {
+      try {
+        let response;
+        switch (activeTab) {
+          case "Vaccines":
+            response = await axios.post(
+              "https://argosmob.com/being-petz/public/api/v1/vaccine/all-records",
+              { pet_id: selectedPet.id }
+            );
+            setVaccineRecords(response.data.data || []);
+            break;
+          case "Deworming":
+            response = await axios.post(
+              "https://argosmob.com/being-petz/public/api/v1/deworming/all-records",
+              { pet_id: selectedPet.id }
+            );
+            setDewormingRecords(response.data.data || []);
+            break;
+          case "Grooming":
+            response = await axios.post(
+              "https://argosmob.com/being-petz/public/api/v1/grooming/all-records",
+              { pet_id: selectedPet.id }
+            );
+            setGroomingRecords(response.data.data || []);
+            break;
+          case "Meals":
+            response = await axios.post(
+              "https://argosmob.com/being-petz/public/api/v1/meal/all-records",
+              { pet_id: selectedPet.id }
+            );
+            setMealRecords(response.data.data || []);
+            break;
+          case "Weight":
+            response = await axios.post(
+              "https://argosmob.com/being-petz/public/api/v1/weight/all-records",
+              { pet_id: selectedPet.id }
+            );
+            setWeightHistory(
+              response.data.data.map((r: any) => ({
+                date: new Date(r.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }),
+                weight: r.weight,
+              })) || []
+            );
+            break;
+        }
+      } catch (err) {
+        console.error("Error fetching records:", err);
       }
-    } catch (error) {
-      console.error("Failed to fetch community details", error);
-    }
+    };
+
+    fetchRecords();
+  }, [selectedPet, activeTab]);
+
+
+  const handleAddWeight = () => {
+    if (!newWeight) return;
+    const today = new Date();
+    const date = today.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    setWeightHistory((prev) => [...prev, { date, weight: parseInt(newWeight) }]);
+    setNewWeight("");
+  };
+
+  const handleAddDetails = () => {
+    console.log("Active Tab:", activeTab);
+    console.log("Selected Pet:", selectedPet);
+    console.log("Vaccine:", vaccine);
+    console.log("Meals:", meals);
+    console.log("Uploaded file:", uploadFile);
+    console.log("Weight History:", weightHistory);
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden pt-12">
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-
-      <div className="flex flex-1 w-full">
-        {/* Main Content */}
-        <div className="flex flex-col flex-1">
-          <div className="w-full border-b bg-white shadow-sm">
-            <Header onMenuClick={toggleSidebar} />
-          </div>
-
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-            {!activeChat ? (
-              <div className="w-full max-w-4xl mx-auto">
-                {/* Communities List */}
-                <CommunityList
-                  communities={communities}
-                  onCreate={() => setShowForm(true)}
-                  onSelectCommunity={handleSelectCommunity}
-                  title="MY COMMUNITIES"
-                />
-
-                {/* Instagram-style Horizontal Scroll */}
-                {communities.length > 0 && (
-                  <div className="mt-6">
-                    <h2 className="text-lg font-semibold mb-3">Joined Communities</h2>
-                    <div className="flex gap-4 overflow-x-auto pb-2">
-                      {communities.map((comm) => (
-                        <div
-                          key={comm.id}
-                          className="flex-shrink-0 w-20 text-center cursor-pointer"
-                          onClick={() => handleSelectCommunity(comm)}
-                        >
-                          {/* Profile Image */}
-                          <div className="w-16 h-16 mx-auto rounded-full border-2 border-purple-500 overflow-hidden">
-                            <img
-                              src={comm.image || catIcon}
-                              alt={comm.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          {/* Community Name */}
-                          <p className="mt-1 text-xs text-gray-700 truncate">{comm.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Chats Section */}
-                {communities.length > 0 && (
-                  <div className="mt-6">
-                    <h2 className="text-lg font-semibold mb-3">Chats</h2>
-                    <div className="bg-white rounded-xl shadow divide-y">
-                      {communities.map((comm) => (
-                        <div
-                          key={comm.id}
-                          className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-50 transition"
-                          onClick={() => handleSelectCommunity(comm)}
-                        >
-                          {/* Community Image */}
-                          <img
-                            src={comm.image || catIcon}
-                            alt={comm.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-purple-500"
-                          />
-
-                          {/* Chat Info */}
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-800">{comm.name}</p>
-                            <p className="text-sm text-gray-500 truncate">
-                              {comm.message || "No messages yet..."}
-                            </p>
-                          </div>
-
-                          {/* Time + Unread */}
-                          <div className="text-right">
-                            <p className="text-xs text-gray-400">{comm.time || ""}</p>
-                            {comm.unread && comm.unread > 0 && (
-                              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-purple-600 text-white text-xs">
-                                {comm.unread}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Create Community Form */}
-                {showForm && (
-                  <CreateCommunityForm
-                    onClose={() => setShowForm(false)}
-                    onCreateCommunity={handleCreateCommunity}
-                  />
-                )}
-              </div>
+    <div className="min-h-screen flex flex-col pt-10">
+      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex flex-1">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <main className="flex-grow p-6 bg-gray-50">
+          {/* Pets */}
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold mb-4">My Pet Family</h2>
+            {loading ? (
+              <p>Loading...</p>
             ) : (
-              <div className="w-full max-w-4xl mx-auto">
-                <div className="bg-white rounded-xl shadow p-4 mb-4 flex items-center gap-4">
-                  <img
-                    src={selectedCommunityDetails?.image || catIcon}
-                    alt={selectedCommunityDetails?.name}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-purple-500"
-                  />
-                  <div>
-                    <h2 className="text-xl font-bold">{selectedCommunityDetails?.name}</h2>
-                    <p className="text-sm text-gray-500">
-                      Creator: {selectedCommunityDetails?.creator} | Members:{" "}
-                      {selectedCommunityDetails?.usersCount}
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {pets.map((pet, i) => (
+                  <div
+                    key={pet.id}
+                    className={`bg-white rounded-xl shadow-md p-4 w-48 flex-shrink-0 text-center cursor-pointer ${
+                      selectedPet?.id === pet.id ? "border-2 border-purple-600" : ""
+                    }`}
+                    onClick={() => setSelectedPet(pet)}
+                  >
+                    <img
+                      src={
+                        pet.avatar
+                          ? pet.avatar.startsWith("http")
+                            ? pet.avatar
+                            : `https://argosmob.com/being-petz/public/${pet.avatar}`
+                          : dummyImages[i % dummyImages.length]
+                      }
+                      alt={pet.name}
+                      className="w-20 h-20 rounded-full mx-auto border-2 border-purple-500 object-cover"
+                    />
+                    <h3 className="mt-3 font-bold">{pet.name}</h3>
+                    <p className="text-sm text-gray-500">{pet.breed}</p>
+                    <p className="text-xs text-gray-400">
+                      {pet.age} Years {pet.gender === "Male" ? "♂ Male" : "♀ Female"}
                     </p>
                   </div>
-                </div>
-
-                <ChatScreen
-                  community={activeChat}
-                  onBack={() => setActiveChat(null)}
-                />
+                ))}
               </div>
             )}
-          </main>
-        </div>
-
-        {/* Suggested Communities Sidebar */}
-        <div className="hidden lg:block w-80 bg-white border-l border-gray-200 overflow-y-auto">
-          <div className="p-6">
-            <SuggestedCommunities
-              communities={suggestedCommunities}
-              onJoinCommunity={handleJoinCommunity}
-            />
           </div>
-        </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-full border ${
+                  tab === activeTab
+                    ? "bg-purple-600 text-white border-purple-600"
+                    : "border-purple-600 text-purple-600"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex flex-wrap gap-6">
+            {/* Left Box */}
+            {activeTab !== "Weight" && (
+              <div className="border border-purple-600 p-4 rounded w-80">
+                {activeTab === "Vaccines" && (
+                  <>
+                    <p className="font-semibold mb-2">Vaccine Records</p>
+                    {vaccineRecords.length === 0 ? (
+                      <p>No records found</p>
+                    ) : (
+                      vaccineRecords.map((v) => (
+                        <div key={v.id} className="mb-2">
+                          <p>
+                            <span className="font-semibold">Vaccine:</span> {v.name}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Date:</span>{" "}
+                            {new Date(v.date).toLocaleDateString("en-GB")}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
+                {activeTab === "Deworming" && (
+                  <>
+                    <p className="font-semibold mb-2">Deworming Records</p>
+                    {dewormingRecords.length === 0 ? (
+                      <p>No records found</p>
+                    ) : (
+                      dewormingRecords.map((v) => (
+                        <div key={v.id} className="mb-2">
+                          <p>
+                            <span className="font-semibold">Medicine:</span> {v.medicine}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Date:</span>{" "}
+                            {new Date(v.date).toLocaleDateString("en-GB")}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
+                {activeTab === "Grooming" && (
+                  <>
+                    <p className="font-semibold mb-2">Grooming Records</p>
+                    {groomingRecords.length === 0 ? (
+                      <p>No records found</p>
+                    ) : (
+                      groomingRecords.map((v) => (
+                        <div key={v.id} className="mb-2">
+                          <p>
+                            <span className="font-semibold">Service:</span> {v.service}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Date:</span>{" "}
+                            {new Date(v.date).toLocaleDateString("en-GB")}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
+                {activeTab === "Meals" && (
+                  <>
+                    <p className="font-semibold mb-2">Meal Records</p>
+                    {mealRecords.length === 0 ? (
+                      <p>No records found</p>
+                    ) : (
+                      mealRecords.map((v) => (
+                        <div key={v.id} className="mb-2">
+                          <p>
+                            <span className="font-semibold">Type:</span> {v.type}
+                          </p>
+                          <p>
+                            <span className="font-semibold">Date:</span>{" "}
+                            {new Date(v.date).toLocaleDateString("en-GB")}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Right Box */}
+            {activeTab === "Weight" && (
+              <div className="flex flex-wrap gap-6 w-full">
+                <div className="flex-1 border border-purple-600 rounded p-4">
+                  <Line
+                    data={{
+                      labels: weightHistory.map((entry) => entry.date),
+                      datasets: [
+                        {
+                          label: "Weight (kg)",
+                          data: weightHistory.map((entry) => entry.weight),
+                          borderColor: "#9333ea",
+                          backgroundColor: "#9333ea",
+                          tension: 0.3,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      plugins: { legend: { display: true, position: "top" } },
+                      scales: {
+                        y: { min: 0, max: 100, ticks: { stepSize: 10 } },
+                      },
+                    }}
+                  />
+                  <div className="mt-6 flex gap-3 justify-center">
+                    <input
+                      type="number"
+                      placeholder="Enter weight (kg)"
+                      value={newWeight}
+                      onChange={(e) => setNewWeight(e.target.value)}
+                      className="border px-3 py-2 rounded w-40"
+                    />
+                    <button
+                      onClick={handleAddWeight}
+                      className="px-6 py-2 border border-purple-600 text-purple-600 rounded-full font-semibold hover:bg-purple-600 hover:text-white"
+                    >
+                      + Add Weight
+                    </button>
+                  </div>
+                </div>
+                <div className="border border-purple-600 p-4 rounded w-80">
+                  <p className="font-semibold mb-4">Weight History</p>
+                  {weightHistory
+                    .slice()
+                    .reverse()
+                    .map((entry, index) => (
+                      <div key={index} className="mb-3 flex items-center gap-3">
+                        <span className="text-purple-600 text-xl">📅</span>
+                        <div>
+                          <p className="font-semibold">{entry.weight} kg</p>
+                          <p className="text-sm text-gray-600">{entry.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleAddDetails}
+            className="mt-6 px-6 py-2 bg-purple-600 text-white rounded"
+          >
+            Add Details
+          </button>
+        </main>
       </div>
     </div>
   );
-}
+};
 
-export default CommunityApp;
+export default CareForm;

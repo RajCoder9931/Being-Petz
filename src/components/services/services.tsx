@@ -17,7 +17,7 @@ const services = [
 ];
 
 export default function Services() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 

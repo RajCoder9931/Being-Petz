@@ -616,7 +616,7 @@ import defaultProfile from "../../assets/img/profile.jpeg";
 const BASE_URL = "https://argosmob.uk/being-petz/public/";
 
 const EditProfile: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [profileImage, setProfileImage] = useState<string>(defaultProfile);
   const [profileFile, setProfileFile] = useState<File | null>(null);

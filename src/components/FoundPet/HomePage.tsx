@@ -10,7 +10,7 @@ import SuccessStories from "./SuccessStories";
 import Sidebar from "../dashboard/sidebar";  
 
 const HomePage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-white pt-14">

@@ -21,6 +21,7 @@ type Community = {
 const SuggestedCommunities: React.FC = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState<number | null>(null);
 
   // Get logged-in user ID from localStorage
   const storedUser = localStorage.getItem("user");
@@ -33,7 +34,7 @@ const SuggestedCommunities: React.FC = () => {
           "https://argosmob.com/being-petz/public/api/v1/pet/community/get"
         );
 
-        let fetchedCommunities: Community[] = response.data.data; // assuming response.data.data contains the array
+        let fetchedCommunities: Community[] = response.data.data;
 
         // Filter out communities created by the user or joined by the user
         const filteredCommunities = fetchedCommunities.filter((community) => {
@@ -53,39 +54,86 @@ const SuggestedCommunities: React.FC = () => {
     fetchCommunities();
   }, [userId]);
 
+  const handleJoin = async (communityId: number) => {
+    if (!userId) return;
+
+    try {
+      setJoining(communityId);
+      const response = await axios.post(
+        "https://argosmob.com/being-petz/public/api/v1/pet/community/join",
+        {
+          user_id: userId,
+          community_id: communityId,
+        }
+      );
+
+      if (response.data?.status) {
+        // Remove the joined community from suggested list
+        setCommunities((prev) => prev.filter((c) => c.id !== communityId));
+      } else {
+        alert(response.data?.message || "Failed to join community");
+      }
+    } catch (error) {
+      console.error("Error joining community:", error);
+      alert("Error joining community");
+    } finally {
+      setJoining(null);
+    }
+  };
+
   if (loading) return <div>Loading communities...</div>;
   if (!communities.length)
-    return <div className="text-center text-gray-500 py-4">No suggested communities available</div>;
+    return (
+      <div className="text-center text-gray-500 py-4">
+        No suggested communities available
+      </div>
+    );
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-lg font-bold text-gray-800 mb-4">SUGGESTED COMMUNITIES</h2>
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold text-purple-700 border-b pb-2">
+        Suggested Communities
+      </h2>
+
+      <div className="grid gap-4">
         {communities.map((community) => (
           <div
             key={community.id}
-            className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors"
+            className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300"
           >
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
               <img
                 src={community.cover_image || catIcon}
                 alt={community.name}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-12 h-12 rounded-full object-cover border border-gray-200"
               />
+
+              {/* Name + Members */}
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-800 text-sm">{community.name}</h3>
-                <p className="text-xs text-gray-500">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
+                    {community.name}
+                  </h3>
+
+                  {/* Small Join Button */}
+                  <button
+                    onClick={() => handleJoin(community.id)}
+                    disabled={joining === community.id}
+                    className={`ml-2 px-3 py-1 rounded-md text-xs font-medium transition-colors
+                      ${joining === community.id
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-purple-600 text-white hover:bg-purple-700"
+                      }`}
+                  >
+                    {joining === community.id ? "Joining..." : "Join"}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
                   {community.users?.length || 0} members
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={() => alert(`Joining community ${community.id}`)}
-              className="w-full bg-purple-600 text-white py-1.5 px-3 rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm"
-            >
-              Join
-            </button>
           </div>
         ))}
       </div>

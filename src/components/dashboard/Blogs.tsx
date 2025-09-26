@@ -9,18 +9,25 @@ type Blog = {
   title: string;
   short_description: string;
   content: string;
-  image: string;
+  image: string | null;
+  created_at: string;
+  admin: {
+    first_name: string;
+    last_name: string | null;
+    latitude: string | null;
+    longitude: string | null;
+  };
 };
 
 const BlogPage: React.FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-      // dummy imgaes 
+  // Dummy pet images
   const petDummyImages = [
     "https://placedog.net/600/400?id=1",
     "https://placedog.net/600/400?id=2",
@@ -63,7 +70,14 @@ const BlogPage: React.FC = () => {
             content: blog.content,
             image: blog.image
               ? `https://argosmob.com/being-petz/public/${blog.image}`
-              : getRandomPetImage(),  // random images
+              : getRandomPetImage(),
+            created_at: blog.created_at,
+            admin: {
+              first_name: blog.admin.first_name,
+              last_name: blog.admin.last_name,
+              latitude: blog.admin.latitude,
+              longitude: blog.admin.longitude,
+            },
           }));
 
           allBlogs = allBlogs.concat(pageBlogs);
@@ -164,6 +178,23 @@ const BlogPage: React.FC = () => {
                     >
                       {expanded === blog.id ? "Read Less" : "Read More"}
                     </button>
+                    <div className="mt-4 text-xs text-gray-500">
+                      <p>
+                        <strong>Author:</strong>{" "}
+                        {blog.admin.first_name}{" "}
+                        {blog.admin.last_name || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Published on:</strong>{" "}
+                        {new Date(blog.created_at).toLocaleDateString()}
+                      </p>
+                      {blog.admin.latitude && blog.admin.longitude && (
+                        <p>
+                          <strong>Location:</strong>{" "}
+                          {blog.admin.latitude}, {blog.admin.longitude}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -198,6 +229,25 @@ const BlogPage: React.FC = () => {
               {selectedBlog.title}
             </h2>
             <p className="text-gray-700 mt-2">{selectedBlog.content}</p>
+            <div className="mt-4 text-xs text-gray-500">
+              <p>
+                <strong>Author:</strong>{" "}
+                {selectedBlog.admin.first_name}{" "}
+                {selectedBlog.admin.last_name || "N/A"}
+              </p>
+              <p>
+                <strong>Published on:</strong>{" "}
+                {new Date(selectedBlog.created_at).toLocaleDateString()}
+              </p>
+              {selectedBlog.admin.latitude &&
+                selectedBlog.admin.longitude && (
+                  <p>
+                    <strong>Location:</strong>{" "}
+                    {selectedBlog.admin.latitude},{" "}
+                    {selectedBlog.admin.longitude}
+                  </p>
+                )}
+            </div>
           </motion.div>
         </div>
       )}

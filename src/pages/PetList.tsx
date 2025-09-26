@@ -48,7 +48,7 @@ interface ApiResponse {
 }
 
 const PetList = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [likedPets, setLikedPets] = useState<number[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [pets, setPets] = useState<Pet[]>([]);

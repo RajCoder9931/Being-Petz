@@ -10,31 +10,17 @@ interface User {
   profile?: string | null;
 }
 
-interface Message {
+interface PollVote {
   id: number;
-  user_id: number;
-  message_type: "text" | "image" | "video" | "poll";
-  message_text?: string | null;
-  media_path?: string | null;
-  poll_options?: string[];
-  created_at: string;
+  option_id: number;
   user: User;
 }
 
-interface ChatScreenProps {
-  community: { id: number; name: string };
-  onBack: () => void;
-}
-
-interface ApiResponse {
-  status: boolean;
-  data: Message[];
-}
 interface PollOption {
   id: number;
   poll_id: number;
   option_text: string;
-  votes?: number; // after vote
+  votes?: PollVote[];
 }
 
 interface Poll {
@@ -55,6 +41,16 @@ interface Message {
   user: User;
 }
 
+interface ChatScreenProps {
+  community: { id: number; name: string };
+  onBack: () => void;
+}
+
+interface ApiResponse {
+  status: boolean;
+  data: Message[];
+}
+
 export default function ChatScreen({ community, onBack }: ChatScreenProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -62,12 +58,12 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
   const [sending, setSending] = useState(false);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-
   const [isPollOpen, setIsPollOpen] = useState(false);
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [votedPolls, setVotedPolls] = useState<{ [pollId: number]: boolean }>({});
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null); // for three-dot menu
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -105,30 +101,26 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
     return () => clearInterval(interval);
   }, [community.id]);
 
-  // Media file selection
+  // Handle media
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     setMediaFile(file);
     setPreview(URL.createObjectURL(file));
   };
+
+  // Handle voting
   const handleVote = async (pollId: number, optionId: number) => {
     if (!user || !optionId) return;
     try {
       const res = await axios.post(
         "https://argosmob.com/being-petz/public/api/v1/community/vote-poll",
-        {
-          poll_id: pollId,
-          option_id: optionId,
-          parent_id: user.id,
-        },
+        { poll_id: pollId, option_id: optionId, parent_id: user.id },
         { headers: { "Content-Type": "application/json" } }
       );
 
       if (res.data.status) {
-        // Mark this poll as voted
         setVotedPolls({ ...votedPolls, [pollId]: true });
-        // Refetch messages to show updated votes
         fetchMessages();
       }
     } catch (error) {
@@ -136,7 +128,7 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
     }
   };
 
-  // Send text/image/video
+  // Send message
   const handleSendMessage = async () => {
     if (!user || (newMessage.trim() === "" && !mediaFile)) return;
     setSending(true);
@@ -154,18 +146,16 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
       if (newMessage.trim() !== "") formData.append("message_text", newMessage.trim());
       if (mediaFile) formData.append("media", mediaFile);
 
-      const res = await axios.post(
+      await axios.post(
         "https://argosmob.com/being-petz/public/api/v1/community/send-message",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      if (res.status === 200 || res.status === 201) {
-        setNewMessage("");
-        setMediaFile(null);
-        setPreview(null);
-        fetchMessages();
-      }
+      setNewMessage("");
+      setMediaFile(null);
+      setPreview(null);
+      fetchMessages();
     } catch (error) {
       console.error("Failed to send message", (error as AxiosError).response?.data || error);
     } finally {
@@ -183,24 +173,22 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
         community_id: community.id,
         parent_id: user.id,
         message_type: "poll",
-        question: pollQuestion.trim(),   // <-- changed
-        options: pollOptions,           // <-- changed
+        question: pollQuestion.trim(),
+        options: pollOptions,
         isReply: 0,
         message_id: null,
       };
 
-      const res = await axios.post(
+      await axios.post(
         "https://argosmob.com/being-petz/public/api/v1/community/send-message",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
 
-      if (res.status === 200 || res.status === 201) {
-        setPollQuestion("");
-        setPollOptions(["", ""]);
-        setIsPollOpen(false);
-        fetchMessages();
-      }
+      setPollQuestion("");
+      setPollOptions(["", ""]);
+      setIsPollOpen(false);
+      fetchMessages();
     } catch (error) {
       console.error("Failed to send poll", (error as AxiosError).response?.data || error);
     } finally {
@@ -208,26 +196,50 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
     }
   };
 
+  // Delete message
+  const handleDeleteMessage = async (msgId: number) => {
+    if (!user) return;
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
+
+    try {
+      const res = await axios.post(
+        "https://argosmob.com/being-petz/public/api/v1/community/delete-message-for-all",
+        { message_id: msgId, user_id: user.id },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (res.data.status) {
+        setMessages(messages.filter((m) => m.id !== msgId));
+      } else {
+        alert("Failed to delete message");
+      }
+    } catch (error) {
+      console.error("Failed to delete message", (error as AxiosError).response?.data || error);
+    }
+  };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-xl shadow overflow-hidden">
+    <div className="flex flex-col h-full bg-gradient-to-b from-purple-50 to-white rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center p-4 border-b bg-gray-50">
-        <button onClick={onBack} className="text-purple-600 font-bold mr-4">
-          Back
+      <div className="flex items-center p-4 border-b bg-purple-100/60">
+        <button
+          onClick={onBack}
+          className="text-purple-700 font-bold px-3 py-1 rounded-lg hover:bg-purple-200 transition"
+        >
+          ← Back
         </button>
-        <h2 className="text-lg font-bold">{community.name}</h2>
+        <h2 className="text-lg font-bold text-purple-800 ml-4">{community.name}</h2>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
           <p className="text-gray-500 text-sm text-center">Loading messages...</p>
         ) : messages.length === 0 ? (
           <p className="text-gray-400 text-sm text-center">No messages yet</p>
         ) : (
           messages.map((msg) => {
-            const isCurrentUser = msg.user_id === user?.id;
+            const isCurrentUser = msg.user.id === user?.id;
             const username = `${msg.user.first_name} ${msg.user.last_name}`;
 
             return (
@@ -235,6 +247,7 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
                 key={msg.id}
                 className={`flex gap-2 ${isCurrentUser ? "justify-end" : "justify-start"}`}
               >
+                {/* Profile pic only for others */}
                 {!isCurrentUser && (
                   <img
                     src={msg.user.profile ? `https://argosmob.com/being-petz/public/${msg.user.profile}` : catIcon}
@@ -243,91 +256,120 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
                   />
                 )}
 
-                <div
-                  className={`max-w-xs p-2 rounded-lg ${isCurrentUser ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-800"
-                    }`}
-                >
-                  {!isCurrentUser && <p className="text-xs font-bold">{username}</p>}
+                <div className="relative max-w-xs p-3 rounded-2xl shadow bg-gray-100 text-gray-900">
+                  {/* Three-dot menu for current user */}
+                  {isCurrentUser && (
+                    <div className="absolute top-1 right-1">
+                      <div className="relative">
+                        <button
+                          onClick={() => setMenuOpenId(menuOpenId === msg.id ? null : msg.id)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          ⋯
+                        </button>
+                        {menuOpenId === msg.id && (
+                          <div className="absolute right-0 mt-1 w-24 bg-white border rounded-md shadow-lg z-10">
+                            <button
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                  {/* Text message */}
+                  {/* Name for others */}
+                  {!isCurrentUser && <p className="text-xs font-bold mb-1">{username}</p>}
+
+                  {/* Text */}
                   {msg.message_type === "text" && <p className="text-sm">{msg.message_text}</p>}
 
-                  {/* Image message */}
+                  {/* Image */}
                   {msg.message_type === "image" && msg.media_path && (
                     <img
                       src={`https://argosmob.com/being-petz/public/${msg.media_path}`}
                       alt="sent media"
-                      className="w-32 h-32 object-cover rounded-lg"
+                      className="w-40 h-40 object-cover rounded-lg"
                     />
                   )}
 
-                  {/* Video message */}
+                  {/* Video */}
                   {msg.message_type === "video" && msg.media_path && (
                     <video
                       src={`https://argosmob.com/being-petz/public/${msg.media_path}`}
                       controls
-                      className="w-40 h-32 rounded-lg"
+                      className="w-52 h-40 rounded-lg"
                     />
                   )}
 
-                  {/* Poll message */}
-                  {/* Poll message */}
+                  {/* Poll */}
                   {msg.message_type === "poll" && msg.poll && (
-                    <div className="bg-yellow-50 p-4 rounded-xl shadow-sm">
+                    <div className="bg-yellow-50 p-4 rounded-xl shadow-sm mt-2">
                       <p className="font-semibold text-sm mb-3">{msg.poll.question}</p>
-
                       {!votedPolls[msg.poll.id] ? (
                         <form>
                           {msg.poll.options.map((opt) => (
                             <label
                               key={opt.id}
-                              className="flex items-center justify-between p-2 mb-2 border rounded-lg cursor-pointer hover:bg-yellow-100 transition"
+                              className="flex items-center gap-2 p-2 mb-2 border rounded-lg cursor-pointer hover:bg-yellow-100 transition"
                             >
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name={`poll-${msg.poll.id}`}
-                                  value={opt.id}
-                                  checked={selectedOption === opt.id}
-                                  onChange={() => setSelectedOption(opt.id)}
-                                  className="accent-yellow-500"
-                                />
-                                <span className="text-sm">{opt.option_text}</span>
-                              </div>
+                              <input
+                                type="radio"
+                                name={`poll-${msg.poll.id}`}
+                                value={opt.id}
+                                checked={selectedOption === opt.id}
+                                onChange={() => setSelectedOption(opt.id)}
+                                className="accent-yellow-500"
+                              />
+                              <span className="text-sm">{opt.option_text}</span>
                             </label>
                           ))}
-
                           <button
                             type="button"
                             disabled={!selectedOption}
                             onClick={() => selectedOption && handleVote(msg.poll.id, selectedOption)}
-                            className="mt-2 w-full bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-600 disabled:opacity-50 transition"
-                        >
+                            className="mt-2 w-full bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600 disabled:opacity-50 transition"
+                          >
                             Submit Vote
                           </button>
                         </form>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {msg.poll.options.map((opt) => {
                             const totalVotes = msg.poll.options.reduce(
-                              (acc, o) => acc + (o.votes ? o.votes.length : 0),
+                              (acc, o) => acc + (o.votes?.length || 0),
                               0
                             );
-                            const percent = totalVotes ? ((opt.votes?.length || 0) / totalVotes) * 100 : 0;
+                            const percent = totalVotes
+                              ? ((opt.votes?.length || 0) / totalVotes) * 100
+                              : 0;
 
                             return (
-                              <div key={opt.id} className="flex flex-col">
-                                <div className="flex justify-between mb-1">
-                                  <span className="text-sm font-medium">{opt.option_text}</span>
-                                  <span className="text-xs text-gray-600">
+                              <div key={opt.id} className="flex flex-col gap-1">
+                                <div className="flex justify-between text-sm">
+                                  <span>{opt.option_text}</span>
+                                  <span className="text-gray-600">
                                     {opt.votes?.length || 0} votes ({percent.toFixed(1)}%)
                                   </span>
                                 </div>
-                                <div className="bg-yellow-200 rounded-full h-4 overflow-hidden">
+                                <div className="bg-yellow-200 rounded-full h-3 overflow-hidden">
                                   <div
-                                    className="bg-yellow-500 h-4 rounded-full transition-all duration-500"
+                                    className="bg-yellow-500 h-3 rounded-full transition-all duration-500"
                                     style={{ width: `${percent}%` }}
                                   ></div>
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {opt.votes?.map((vote) => (
+                                    <span
+                                      key={vote.id}
+                                      className="text-xs bg-gray-200 rounded-full px-2 py-0.5"
+                                    >
+                                      {vote.user.first_name}
+                                    </span>
+                                  ))}
                                 </div>
                               </div>
                             );
@@ -336,7 +378,8 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
                       )}
                     </div>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
+
+                  <p className="text-[10px] opacity-70 mt-1">
                     {new Date(msg.created_at).toLocaleString([], {
                       day: "2-digit",
                       month: "short",
@@ -353,7 +396,7 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
       </div>
 
       {/* Input */}
-      <div className="flex flex-col p-3 border-t gap-2">
+      <div className="flex flex-col p-3 border-t bg-white">
         {preview && (
           <div className="mb-2 relative">
             {mediaFile?.type.startsWith("video") ? (
@@ -362,7 +405,10 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
               <img src={preview} className="w-32 h-32 rounded-lg" alt="preview" />
             )}
             <button
-              onClick={() => { setMediaFile(null); setPreview(null); }}
+              onClick={() => {
+                setMediaFile(null);
+                setPreview(null);
+              }}
               className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center"
             >
               ✕
@@ -370,7 +416,7 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <input
             type="text"
             placeholder="Type a message..."
@@ -380,27 +426,33 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
 
-          {/* Media Upload */}
-          <input type="file" accept="image/*,video/*" onChange={handleMediaChange} className="hidden" id="mediaInput" />
-          <label htmlFor="mediaInput" className="px-4 py-2 bg-gray-200 rounded-full cursor-pointer">
+          <input
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleMediaChange}
+            className="hidden"
+            id="mediaInput"
+          />
+          <label
+            htmlFor="mediaInput"
+            className="px-3 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 transition"
+          >
             📎
           </label>
 
-          {/* Poll Button */}
           <button
             onClick={() => setIsPollOpen(true)}
-            className="px-4 py-2 bg-yellow-400 text-white rounded-full"
+            className="px-3 py-2 bg-yellow-400 text-white rounded-full hover:bg-yellow-500 transition"
           >
             🗳️
           </button>
 
-          {/* Send Message */}
           <button
             onClick={handleSendMessage}
             disabled={sending}
-            className="px-4 py-2 bg-purple-600 text-white rounded-full"
+            className="px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition"
           >
-            {sending ? "Sending..." : "Send"}
+            {sending ? "..." : "Send"}
           </button>
         </div>
 
@@ -456,7 +508,6 @@ export default function ChatScreen({ community, onBack }: ChatScreenProps) {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

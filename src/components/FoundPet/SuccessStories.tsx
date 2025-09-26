@@ -1,4 +1,3 @@
-import React from 'react';
 import { HeartIcon } from 'lucide-react';
 const SuccessStories = () => {
   const stories = [{

@@ -12,7 +12,7 @@ const Petprofile: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [pets, setPets] = useState<any[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // नया state filter के लिए
   const [activeFilter, setActiveFilter] = useState<"all" | "vaccination" | "grooming" | "deworming" | "meal" | "weight">("all");

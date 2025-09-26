@@ -30,7 +30,7 @@ type EventType = {
   bgColor: string;  
 };
 function PetParentProfile() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
   const [locationName, setLocationName] = useState("Fetching location...");

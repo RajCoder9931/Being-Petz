@@ -357,7 +357,7 @@ interface Person {
 }
 
 const FriendRequestPage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [friends, setFriends] = useState<Person[]>([]);
   const [peopleYouMayKnow, setPeopleYouMayKnow] = useState<Person[]>([]);
   const [friendRequests, setFriendRequests] = useState<Person[]>([]); 

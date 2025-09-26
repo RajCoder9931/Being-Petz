@@ -3,7 +3,7 @@ import Header from "../components/dashboard/Header";
 import Sidebar from "../components/dashboard/sidebar";
 
 function PrivacySetting() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
